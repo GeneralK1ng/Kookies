@@ -4,12 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class FileManager {
@@ -45,5 +44,19 @@ public class FileManager {
         try (BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(filePath))) {
             writer.write(content);
         }
+    }
+
+
+    public static Map<Integer, String> readAnswerBook(String filePath) throws IOException{
+        Map<Integer, String> answerBook = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(FileManager.class.getResourceAsStream(filePath))))) {
+            String line;
+            int index = 1;
+            while ((line = reader.readLine()) != null) {
+                answerBook.put(index++, line);
+            }
+        }
+        return answerBook;
     }
 }

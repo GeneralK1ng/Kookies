@@ -1,4 +1,3 @@
-
 plugins {
     val kotlinVersion = "1.8.0"
     kotlin("jvm") version kotlinVersion
@@ -24,4 +23,8 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     api("com.alibaba:fastjson:1.2.83")
     implementation("org.projectlombok:lombok:1.18.32")
+
+    // MyBatis dependencies
+//    implementation("org.mybatis:mybatis:3.5.10")
+//    implementation("mysql:mysql-connector-java:8.0.34") // 使用 MySQL 数据库
 }

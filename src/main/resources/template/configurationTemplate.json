@@ -3,7 +3,28 @@
     "birthday": "2024-05-20",
     "name": "StarKeeper"
   },
-  "admin": [
-    123456789
+  "adminList": [
+    123456789,
+    987654321
+  ],
+  "blackList": [
+    11111111,
+    22222222
+  ],
+  "enableGroupList": [
+    {
+      "id": 666666,
+      "tag": [
+        "test1",
+        "test2"
+      ]
+    },
+    {
+      "id": 777777,
+      "tag": [
+        "test3",
+        "test4"
+      ]
+    }
   ]
 }

@@ -10,5 +10,10 @@ import java.util.List;
 @Builder
 public class Config implements Serializable {
     private BotInfo botInfo;
+
     private List<Long> adminList;
+
+    private List<Long> blackList;
+
+    private List<Group> enableGroupList;
 }
