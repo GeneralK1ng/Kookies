@@ -1,4 +1,9 @@
 {
-  "birthday": "2024-05-20",
-  "name": "StarKeeper"
+  "botInfo": {
+    "birthday": "2024-05-20",
+    "name": "StarKeeper"
+  },
+  "admin": [
+    123456789
+  ]
 }
