@@ -1,7 +1,11 @@
 {
   "botInfo": {
     "birthday": "2024-05-20",
-    "name": "StarKeeper"
+    "name": "Kookie",
+    "baiduApiConfig": {
+      "apiKey": "your apiKey",
+      "secretKey": "your secretKey"
+    }
   },
   "adminList": [
     123456789,

@@ -1,13 +1,25 @@
 package org.kookies.mirai.plugin.auth;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.context.ConfigContext;
 import org.kookies.mirai.commen.exceptions.AuthException;
+import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
+import org.kookies.mirai.commen.info.DataPathInfo;
+import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.Group;
 
-public class Permission {
+import java.io.IOException;
+import java.time.LocalDate;
 
+public class Permission {
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
     /**
      * 检查用户是否有权限
      *
@@ -17,7 +29,13 @@ public class Permission {
      * @throws AuthException 如果用户在黑名单中或者群组未启用，抛出此异常
      */
     public static boolean checkPermission(Long sender, Long group) {
-        Config config = ConfigContext.getConfig();
+        JsonObject jsonObject = null;
+        try {
+            jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        } catch (IOException e) {
+            throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
+        }
+        Config config = gson.fromJson(jsonObject, Config.class);
 
         // 检查用户是否在黑名单中
         if (config.getUserBlackList().contains(sender)) {

@@ -7,7 +7,6 @@ import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.exceptions.AnswerBookException;
-import org.kookies.mirai.commen.exceptions.AuthException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.plugin.auth.Permission;

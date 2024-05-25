@@ -7,6 +7,9 @@ import java.util.List;
 
 @Data
 public class Group implements Serializable {
+    // 群号
     private Long id;
+
+    // 群标签
     private List<String> tag;
 }

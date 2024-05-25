@@ -24,6 +24,8 @@ dependencies {
     api("com.alibaba:fastjson:1.2.83")
     implementation("org.projectlombok:lombok:1.18.32")
 
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // MyBatis dependencies
 //    implementation("org.mybatis:mybatis:3.5.10")
 //    implementation("mysql:mysql-connector-java:8.0.34") // 使用 MySQL 数据库

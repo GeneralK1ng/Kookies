@@ -39,9 +39,9 @@ public class ConfigurationLoader {
             }
 
             // 读取配置文件并解析为 Config 对象
-            JsonObject jsonObject = FileManager.readJsonFile(file.getPath());
-            Config config = gson.fromJson(jsonObject, Config.class);
-            ConfigContext.setConfig(config);  // 设置到 ThreadLocal 中
+//            JsonObject jsonObject = FileManager.readJsonFile(file.getPath());
+//            Config config = gson.fromJson(jsonObject, Config.class);
+//            ConfigContext.setConfig(config);  // 设置到 ThreadLocal 中
         } catch (IOException e) {
             throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
         }
