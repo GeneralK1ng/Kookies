@@ -32,7 +32,7 @@ public final class Kookies extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Kookie 开始加载！");
+        getLogger().info("Kookie 加载完成！");
 
         try {
             ConfigurationLoader.init();

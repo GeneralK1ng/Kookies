@@ -13,7 +13,7 @@ public class Config implements Serializable {
 
     private List<Long> adminList;
 
-    private List<Long> blackList;
+    private List<Long> userBlackList;
 
     private List<Group> enableGroupList;
 }

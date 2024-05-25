@@ -7,7 +7,7 @@ import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.context.ConfigContext;
 import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
-import org.kookies.mirai.commen.info.ConfigurationInfo;
+import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.pojo.entity.Config;
 
@@ -21,7 +21,7 @@ public class ConfigurationLoader {
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
-    private static final File file = new File(ConfigurationInfo.CONFIG_PATH);
+    private static final File file = new File(DataPathInfo.CONFIG_PATH);
 
     /**
      * 对外开放的方法
@@ -32,7 +32,7 @@ public class ConfigurationLoader {
         try {
             if (!file.exists()){
                 file.getParentFile().mkdirs();
-                String templateFile = FileManager.readTemplateFile(ConfigurationInfo.CONFIG_TEMPLATE_PATH);
+                String templateFile = FileManager.readTemplateFile(DataPathInfo.CONFIG_TEMPLATE_PATH);
                 FileManager.write(file.getPath(), templateFile);
             } else {
                 update();
