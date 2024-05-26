@@ -14,7 +14,6 @@ import java.util.*;
 public class FileManager {
     private static final Gson gson = new Gson();
 
-
     /**
      * 从指定路径读取模板文件的内容。
      *

@@ -5,4 +5,6 @@ public class FunctionInfo {
     public static final String ANSWER_BOOK = "答案之书";
 
     public static final String LUCKY_TODAY = "今日运势";
+
+    public static final String EVALUATE_SOMEBODY = "评价一下";
 }

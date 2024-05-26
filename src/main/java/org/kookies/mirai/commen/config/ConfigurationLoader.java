@@ -16,6 +16,10 @@ import java.time.LocalDate;
 
 
 public class ConfigurationLoader {
+    private static final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
+
     private static final File file = new File(DataPathInfo.CONFIG_PATH);
 
     /**

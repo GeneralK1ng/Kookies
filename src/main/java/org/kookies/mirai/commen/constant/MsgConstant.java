@@ -18,4 +18,8 @@ public class MsgConstant {
     public static final String LUCKY_DAY_PERMISSION_DUPLICATE_ERROR = "今天已经获取过运势啦";
 
     public static final String BOT_INFO_LOAD_ERROR = "Bot信息加载失败";
+
+    public static final String CACHE_EXCEPTION = "缓存异常";
+
+    public static final String INVALID_QQ_NUMBER = "无效的QQ号码格式错误";
 }
