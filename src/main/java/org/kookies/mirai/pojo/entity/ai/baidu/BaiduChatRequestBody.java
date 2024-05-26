@@ -1,6 +1,5 @@
 package org.kookies.mirai.pojo.entity.ai.baidu;
 
-import com.google.gson.annotations.Expose;
 import lombok.Builder;
 import lombok.Data;
 
@@ -32,7 +31,7 @@ public class BaiduChatRequestBody {
         （1）影响输出文本的多样性，取值越大，生成文本的多样性越强
         （2）取值范围：正整数
     */
-    private Integer top_k;
+    //private Integer top_k;
 
     /*  说明：
         （1）影响输出文本的多样性，取值越大，生成文本的多样性越强

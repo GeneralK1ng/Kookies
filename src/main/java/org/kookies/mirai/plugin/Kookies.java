@@ -58,9 +58,11 @@ public final class Kookies extends JavaPlugin {
             String[] msgArr = msg.split(" ");
 
             switch (msgArr[0]){
+                // 答案之书
                 case FunctionInfo.ANSWER_BOOK:
                     answerBookService.answer(sender, group);
                     break;
+                // 今日运势
                 case FunctionInfo.LUCKY_TODAY:
                     luckyDayService.luckyDay(sender, group);
                     break;
@@ -69,7 +71,7 @@ public final class Kookies extends JavaPlugin {
         });
 
         eventChannel.subscribeAlways(FriendMessageEvent.class, f -> {
-            //监听好友消息
+            // 监听好友消息
             getLogger().info(f.getMessage().contentToString());
         });
 

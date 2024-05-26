@@ -5,11 +5,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
-import org.kookies.mirai.commen.context.ConfigContext;
 import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
-import org.kookies.mirai.pojo.entity.Config;
 
 
 import java.io.File;
@@ -18,9 +16,6 @@ import java.time.LocalDate;
 
 
 public class ConfigurationLoader {
-    private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-            .create();
     private static final File file = new File(DataPathInfo.CONFIG_PATH);
 
     /**
@@ -37,7 +32,6 @@ public class ConfigurationLoader {
             } else {
                 update();
             }
-
             // 读取配置文件并解析为 Config 对象
 //            JsonObject jsonObject = FileManager.readJsonFile(file.getPath());
 //            Config config = gson.fromJson(jsonObject, Config.class);

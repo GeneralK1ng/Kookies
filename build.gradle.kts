@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.kookies"
-version = "0.1.0"
+version = "0.1.3"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {

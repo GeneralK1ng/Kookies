@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
-import org.kookies.mirai.commen.context.ConfigContext;
 import org.kookies.mirai.commen.exceptions.AuthException;
 import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
@@ -29,7 +28,7 @@ public class Permission {
      * @throws AuthException 如果用户在黑名单中或者群组未启用，抛出此异常
      */
     public static boolean checkPermission(Long sender, Long group) {
-        JsonObject jsonObject = null;
+        JsonObject jsonObject;
         try {
             jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
         } catch (IOException e) {
