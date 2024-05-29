@@ -1,10 +1,11 @@
-package org.kookies.mirai.pojo.entity.ai.baidu;
+package org.kookies.mirai.pojo.entity.api.baidu.ai.response;
 
 import lombok.Data;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Usage;
 
 
 @Data
-public class BaiduChatResponse {
+public class ChatResponse {
     // 本轮对话的id
     private String id;
 

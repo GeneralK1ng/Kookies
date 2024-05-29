@@ -1,10 +1,11 @@
 package org.kookies.mirai.commen.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
-import org.kookies.mirai.pojo.entity.ai.baidu.Message;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -134,5 +135,11 @@ public class FileManager {
             }
         }
         return messages;
+    }
+
+    public static JsonArray readJsonArray(String filePath) throws IOException {
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
+            return JsonParser.parseReader(reader).getAsJsonArray();
+        }
     }
 }

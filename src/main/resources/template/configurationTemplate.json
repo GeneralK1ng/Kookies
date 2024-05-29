@@ -5,6 +5,9 @@
     "baiduApiConfig": {
       "apiKey": "your apiKey",
       "secretKey": "your secretKey"
+    },
+    "gaodeApiConfig": {
+      "apiKey": "your apiKey"
     }
   },
   "adminList": [

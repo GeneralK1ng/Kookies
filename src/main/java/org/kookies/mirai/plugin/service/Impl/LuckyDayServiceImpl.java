@@ -20,8 +20,8 @@ import org.kookies.mirai.plugin.auth.DuplicatePermission;
 import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.LuckyDayService;
 import org.kookies.mirai.pojo.dto.LuckDayDTO;
-import org.kookies.mirai.pojo.entity.ai.baidu.BaiduChatResponse;
-import org.kookies.mirai.pojo.entity.ai.baidu.Message;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.response.ChatResponse;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -57,7 +57,7 @@ public class LuckyDayServiceImpl implements LuckyDayService {
                         .wealthFortune(random.nextInt(100))
                         .build();
                 List<Message> messages = createMessages(luckDayDTO);
-                BaiduChatResponse response = getResponse(messages, sender);
+                ChatResponse response = getResponse(messages, sender);
 
                 sendMsg(at, group, chain, luckDayDTO, response.getResult());
             } else {
@@ -134,9 +134,7 @@ public class LuckyDayServiceImpl implements LuckyDayService {
         Message message = Message.builder()
                 .role(AIRoleType.USER.getRole())
                 .content("请你帮我分析今天的运势并且给我一个可爱的祝福语，要多多表现Kookie的可爱与天真，\n" +
-                        "并且分享一个日常生活中和主人（General_K1ng）的琐事，分享琐事要自然一些不要刻意提起（不要出现“说起一些我和主人的趣事呀”这样的话，要自然引入）。你的心情和琐事可以是任何，有好有坏。分享完后给出祝福，不用给出继续谈话的语句。\n" +
-                        "注意对General_K1ng的称呼，是主人。\n" +
-                        "所有的对话都要充满日常感，不能让人感觉到跳脱" +
+                        "所有的对话都要充满日常感，不能让人感觉到跳脱。" +
                         "今天的运势是:" +
                         "财运：" + luckDayDTO.getWealthFortune() +
                         "学业：" + luckDayDTO.getSchoolFortune() +
@@ -154,10 +152,10 @@ public class LuckyDayServiceImpl implements LuckyDayService {
      *
      * @param messages 用户向机器人发送的消息列表。
      * @param sender   发送请求的用户ID。
-     * @return BaiduChatResponse 从百度API获取的聊天响应对象，包含具体的响应内容。
+     * @return ChatResponse 从百度API获取的聊天响应对象，包含具体的响应内容。
      * @throws RequestException 如果请求过程中发生IO异常，则抛出请求异常。
      */
-    private BaiduChatResponse getResponse(List<Message> messages, Long sender) {
+    private ChatResponse getResponse(List<Message> messages, Long sender) {
         Response originalResponse;
         String json;
         try {
@@ -171,7 +169,7 @@ public class LuckyDayServiceImpl implements LuckyDayService {
         }
 
         // 使用Gson将JSON字符串解析为BaiduChatResponse对象
-        return gson.fromJson(json, BaiduChatResponse.class);
+        return gson.fromJson(json, ChatResponse.class);
     }
 
 

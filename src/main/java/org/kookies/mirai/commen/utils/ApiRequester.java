@@ -10,11 +10,14 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.BaiduApiConstant;
+import org.kookies.mirai.commen.constant.GaodeAPIConstant;
 import org.kookies.mirai.commen.enumeration.RequestType;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
-import org.kookies.mirai.pojo.entity.ai.baidu.BaiduChatRequestBody;
-import org.kookies.mirai.pojo.entity.ai.baidu.Message;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.ChatRequestBody;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
+import org.kookies.mirai.pojo.entity.api.gaode.request.AddressGetRequestBody;
+import org.kookies.mirai.pojo.entity.api.gaode.request.AroundSearchRequestBody;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -32,6 +35,58 @@ public class ApiRequester {
             .readTimeout(30000, TimeUnit.MILLISECONDS)
             .build();
 
+    public static Response sendAroundSearchRequest (AroundSearchRequestBody aroundSearchRequestBody) throws IOException {
+        // 从配置文件读取配置信息
+        JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        Config config = gson.fromJson(jsonObject, Config.class);
+
+        Request request = new Request.Builder()
+                .url(GaodeAPIConstant.AROUND_SEARCH_API_URL +
+                        "?location=" + aroundSearchRequestBody.getLocation() +
+                        "&types=" + aroundSearchRequestBody.getTypes() +
+                        "&radius=" + aroundSearchRequestBody.getRadius() +
+                        "&sortrule=" + aroundSearchRequestBody.getSortrule() +
+                        "&offset=" + GaodeAPIConstant.OFFSET +
+                        "&page=" + GaodeAPIConstant.PAGE +
+                        "&extensions=" + GaodeAPIConstant.EXTENSIONS +
+                        "&key=" + config.getBotInfo().getGaodeApiConfig().getApiKey())
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+
+        return HTTP_CLIENT.newCall(request).execute();
+    }
+
+
+    /**
+     * 发送地址查询请求到高德地图API。
+     *
+     * @param address 查询的地址。
+     * @param city 查询的城市。
+     * @return 返回高德地图API的响应。
+     * @throws IOException 如果读取配置文件或发送请求时发生IO异常。
+     */
+    public static Response sendAddressRequest(String address, String city) throws IOException{
+        // 从配置文件读取配置信息
+        JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        Config config = gson.fromJson(jsonObject, Config.class);
+
+        // 构建请求URL并创建请求对象
+        Request request = new Request.Builder()
+                .url(GaodeAPIConstant.ADDRESS_GET_API_URL +
+                        "?address=" + address +
+                        "&city=" + city +
+                        "&output=" + GaodeAPIConstant.OUTPUT +
+                        "&key=" + config.getBotInfo().getGaodeApiConfig().getApiKey())
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+
+        // 执行请求并返回响应
+        return HTTP_CLIENT.newCall(request).execute();
+    }
+
+
+
+
     /**
      * 向百度API发送请求。
      *
@@ -46,7 +101,7 @@ public class ApiRequester {
         // 构建请求，包括设置URL、请求方法、请求头和请求体
         Request request = new Request.Builder()
                 .url(BaiduApiConstant.API_URL +
-                        "?access_token=" + getAccessToken())
+                        "?access_token=" + getBaiduAccessToken())
                 .method(RequestType.POST.getMethod(), body)
                 .addHeader("Content-Type", String.valueOf(BaiduApiConstant.JSON_MEDIA_TYPE))
                 .build();
@@ -54,7 +109,6 @@ public class ApiRequester {
 
         return HTTP_CLIENT.newCall(request).execute();
     }
-
 
     /**
      * 创建百度聊天模型的请求体。
@@ -65,7 +119,7 @@ public class ApiRequester {
      */
     private static RequestBody createBaiduRequestBody(List<Message> messages, Long sender) {
         // 构建百度聊天请求体，设置消息、温度、top_k、top_p、惩罚分数、用户ID、是否流式返回等参数
-        BaiduChatRequestBody requestBody = BaiduChatRequestBody.builder()
+        ChatRequestBody requestBody = ChatRequestBody.builder()
                 .messages(messages)
                 .temperature(0.9f)
                 .top_p(1.0f)
@@ -89,7 +143,7 @@ public class ApiRequester {
      * @return 返回从百度API授权服务器获取的访问令牌字符串。
      * @throws IOException 如果网络请求过程中发生IO异常。
      */
-    private static String getAccessToken() throws IOException {
+    private static String getBaiduAccessToken() throws IOException {
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
         Config config = gson.fromJson(jsonObject, Config.class);
         // 构建请求体，包含授权类型、客户端ID和客户端密钥

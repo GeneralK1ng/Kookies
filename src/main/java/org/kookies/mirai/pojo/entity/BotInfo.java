@@ -1,7 +1,8 @@
 package org.kookies.mirai.pojo.entity;
 
 import lombok.Data;
-import org.kookies.mirai.pojo.entity.ai.baidu.BaiduApiConfig;
+import org.kookies.mirai.pojo.entity.api.baidu.BaiduApiConfig;
+import org.kookies.mirai.pojo.entity.api.gaode.GaodeApiConfig;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -17,4 +18,7 @@ public class BotInfo implements Serializable {
 
     // 百度api配置
     private BaiduApiConfig baiduApiConfig;
+
+    // 高德api配置
+    private GaodeApiConfig gaodeApiConfig;
 }

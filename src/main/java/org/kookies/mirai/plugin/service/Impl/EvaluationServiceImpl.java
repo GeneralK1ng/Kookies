@@ -25,8 +25,8 @@ import org.kookies.mirai.plugin.service.EvaluationService;
 import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
 import org.kookies.mirai.pojo.dto.MessageCacheDTO;
 import org.kookies.mirai.pojo.entity.MessageCache;
-import org.kookies.mirai.pojo.entity.ai.baidu.BaiduChatResponse;
-import org.kookies.mirai.pojo.entity.ai.baidu.Message;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.response.ChatResponse;
+import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
             List<Message> botMsg = createBotMsg(dto);
 
-            BaiduChatResponse response = getResponse(botMsg, sender.getId());
+            ChatResponse response = getResponse(botMsg, sender.getId());
             sendMsg(at, group, chain, response.getResult());
         }
 
@@ -111,9 +111,10 @@ public class EvaluationServiceImpl implements EvaluationService {
         Message message = Message.builder()
                 .role(AIRoleType.USER.getRole())
                 .content("请你可爱天真的说出对这个人的感受，他是一个什么样的人呢，你对他有什么感觉呢，表达你的情感：" +
-                        "这是他的nameCard:" + dto.getNameCard() +
-                        "这是他的nick" + dto.getNick() +
-                        "这是他最近30条发言记录：" + dto.getHistoryMsg())
+                        " 这是他的名片:" + dto.getNameCard() +
+                        " 这是他的昵称" + dto.getNick() +
+                        " 这是他最近30条发言记录：" + dto.getHistoryMsg() +
+                        " 说出感受，表达你的情感，说三段话")
                 .build();
         messages.add(message);
         return messages;
@@ -179,10 +180,10 @@ public class EvaluationServiceImpl implements EvaluationService {
      *
      * @param messages 用户向机器人发送的消息列表。
      * @param sender   发送请求的用户ID。
-     * @return BaiduChatResponse 从百度API获取的聊天响应对象，包含具体的响应内容。
+     * @return ChatResponse 从百度API获取的聊天响应对象，包含具体的响应内容。
      * @throws RequestException 如果请求过程中发生IO异常，则抛出请求异常。
      */
-    private BaiduChatResponse getResponse(List<Message> messages, Long sender) {
+    private ChatResponse getResponse(List<Message> messages, Long sender) {
         Response originalResponse;
         String json;
         try {
@@ -196,6 +197,6 @@ public class EvaluationServiceImpl implements EvaluationService {
         }
 
         // 使用Gson将JSON字符串解析为BaiduChatResponse对象
-        return gson.fromJson(json, BaiduChatResponse.class);
+        return gson.fromJson(json, ChatResponse.class);
     }
 }

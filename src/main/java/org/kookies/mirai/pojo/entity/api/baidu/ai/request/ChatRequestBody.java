@@ -1,4 +1,4 @@
-package org.kookies.mirai.pojo.entity.ai.baidu;
+package org.kookies.mirai.pojo.entity.api.baidu.ai.request;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class BaiduChatRequestBody {
+public class ChatRequestBody {
 
     /*  聊天上下文信息。说明：
         （1）messages成员不能为空，1个成员表示单轮对话，多个成员表示多轮对话

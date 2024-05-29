@@ -18,15 +18,15 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.10")
-    implementation("org.json:json:20220924")
+    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("org.json:json:20240303")
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
     api("com.alibaba:fastjson:1.2.83")
     implementation("org.projectlombok:lombok:1.18.32")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    // MyBatis dependencies
-//    implementation("org.mybatis:mybatis:3.5.10")
-//    implementation("mysql:mysql-connector-java:8.0.34") // 使用 MySQL 数据库
+    implementation("org.apache.poi:poi:5.2.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
+
 }

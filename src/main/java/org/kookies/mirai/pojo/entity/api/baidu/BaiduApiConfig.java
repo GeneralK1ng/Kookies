@@ -1,4 +1,4 @@
-package org.kookies.mirai.pojo.entity.ai.baidu;
+package org.kookies.mirai.pojo.entity.api.baidu;
 
 import lombok.Data;
 

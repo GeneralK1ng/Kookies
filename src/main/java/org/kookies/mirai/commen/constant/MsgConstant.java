@@ -22,4 +22,10 @@ public class MsgConstant {
     public static final String CACHE_EXCEPTION = "缓存异常";
 
     public static final String INVALID_QQ_NUMBER = "无效的QQ号码格式错误";
+
+    public static final String INVALID_ADDRESS = "无效的地址格式错误";
+
+    public static final String EXCEL_LOAD_ERROR = "Excel文件加载失败";
+
+    public static final String EAT_WHAT_POI_LOAD_ERROR = "吃什么POI加载失败";
 }
