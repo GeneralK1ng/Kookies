@@ -18,14 +18,8 @@ import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.info.AuthorInfo;
 import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
-import org.kookies.mirai.plugin.service.AnswerBookService;
-import org.kookies.mirai.plugin.service.EatWhatService;
-import org.kookies.mirai.plugin.service.EvaluationService;
-import org.kookies.mirai.plugin.service.Impl.AnswerBookServiceImpl;
-import org.kookies.mirai.plugin.service.Impl.EatWhatServiceImpl;
-import org.kookies.mirai.plugin.service.Impl.EvaluationServiceImpl;
-import org.kookies.mirai.plugin.service.Impl.LuckyDayServiceImpl;
-import org.kookies.mirai.plugin.service.LuckyDayService;
+import org.kookies.mirai.plugin.service.*;
+import org.kookies.mirai.plugin.service.Impl.*;
 
 
 public final class Kookies extends JavaPlugin {
@@ -43,6 +37,9 @@ public final class Kookies extends JavaPlugin {
 
     // 吃什么
     private final EatWhatService eatWhatService = new EatWhatServiceImpl();
+
+    // 语音模块
+    private final VoiceService voiceService = new VoiceServiceImpl();
 
     private Kookies() {
         super(new JvmPluginDescriptionBuilder(AuthorInfo.ID, AuthorInfo.VERSION)
@@ -96,16 +93,18 @@ public final class Kookies extends JavaPlugin {
                 // 吃什么
                 case FunctionInfo.EAT_WHAT:
                     getLogger().info("吃什么, 调用者：" + userName);
-                    if (msgArr[2] == null) {
+                    if (msgArr.length == 2) {
                         eatWhatService.eatWhat(sender.getId(), group, msgArr[1], null);
-                    } else {
+                    } else if (msgArr.length == 3){
                         eatWhatService.eatWhat(sender.getId(), group, msgArr[1], msgArr[2]);
                     }
-
-
+                    break;
+                // 语音模块
+                case FunctionInfo.VOICE_SAY:
+                    getLogger().info("语音模块, 调用者：" + userName);
+                    voiceService.say(sender.getId(), group, msgArr[1]);
                     break;
             }
-
         });
 
         eventChannel.subscribeAlways(FriendMessageEvent.class, f -> {

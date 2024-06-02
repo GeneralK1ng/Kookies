@@ -4,7 +4,7 @@ package org.kookies.mirai.commen.constant;
 import okhttp3.MediaType;
 
 public class GaodeAPIConstant {
-    public static final String AROUND_SEARCH_API_URL = "https://restapi.amap.com/v5/place/around";
+    public static final String AROUND_SEARCH_API_URL = "https://restapi.amap.com/v3/place/around";
 
     public static final String ADDRESS_GET_API_URL = "https://restapi.amap.com/v3/geocode/geo";
 

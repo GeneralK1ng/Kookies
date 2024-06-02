@@ -15,7 +15,7 @@ public class POI implements Serializable {
 
     private String address;
 
-    private String tag;
+    //private String tag;
 
     private List<Photo> photos;
 }

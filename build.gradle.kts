@@ -7,8 +7,8 @@ plugins {
     id("io.freefair.lombok") version "8.6"
 }
 
-group = "org.kookies"
-version = "0.1.3"
+group = "com.generalk1ng.kookies"
+version = "0.1.5"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {
@@ -29,4 +29,8 @@ dependencies {
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
 
+    api("net.mamoe:mirai-silk-converter:0.0.5")
+
+    implementation("com.aliyun:openapiutil:0.2.1")
+    implementation("com.aliyun:tea-openapi:0.3.1")
 }

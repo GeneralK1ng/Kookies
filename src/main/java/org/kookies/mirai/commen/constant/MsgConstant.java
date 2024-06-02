@@ -28,4 +28,12 @@ public class MsgConstant {
     public static final String EXCEL_LOAD_ERROR = "Excel文件加载失败";
 
     public static final String EAT_WHAT_POI_LOAD_ERROR = "吃什么POI加载失败";
+
+    public static final String IMAGE_GET_ERROR = "图片获取失败";
+
+    public static final String DONT_HAVE_IMAGE = "这家店没有图片展示";
+
+    public static final String VOICE_REQUEST_ERROR = "语音请求错误";
+
+    public static final String FORMAT_CONVERT_ERROR = "格式转换错误";
 }

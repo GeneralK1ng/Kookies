@@ -10,6 +10,7 @@ import net.mamoe.mirai.message.code.MiraiCode;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.utils.ExternalResource;
 import okhttp3.Response;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.GaodeAPIConstant;
@@ -27,13 +28,11 @@ import org.kookies.mirai.pojo.entity.api.gaode.response.AddressResponse;
 import org.kookies.mirai.pojo.entity.api.gaode.response.POI;
 import org.kookies.mirai.pojo.entity.api.gaode.response.POIResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class EatWhatServiceImpl implements EatWhatService {
     private static final Gson gson = new GsonBuilder()
@@ -43,23 +42,39 @@ public class EatWhatServiceImpl implements EatWhatService {
 
     private static final Random random = new Random();
 
+    /**
+     * 根据提供的地址和城市信息，查询附近的一个点位（Point of Interest, POI），
+     * 并向指定群组中的发送者发送关于该点位的消息。
+     *
+     * @param sender 发送请求的用户ID
+     * @param group 目标群组
+     * @param address 提供的地址信息
+     * @param city 提供的城市信息
+     */
     @Override
     public void eatWhat(long sender, Group group, String address, String city) {
+        // 初始化消息链构建器
         MessageChainBuilder chain = new MessageChainBuilder();
+        // 构建AT消息，指明消息是回复给特定用户的
         MessageChain at = MiraiCode.deserializeMiraiCode("[mirai:at:" + sender + "]");
 
+        // 检查发送者是否有权限执行操作
         if (Permission.checkPermission(sender, group.getId())) {
+            // 获取地址验证响应
             AddressResponse addressResponse = getAddressResponse(address, city);
 
+            // 构建用于附近搜索的请求体
             AroundSearchRequestBody aroundSearchRequestBody = AroundSearchRequestBody.builder()
                     .location(addressResponse.getLocation())
-                    .types(getPOI())
-                    .radius(GaodeAPIConstant.RADIUS)
-                    .sortrule(GaodeAPIConstant.SORT_RULE)
+                    .types(getPOI()) // 获取搜索的点位类型
+                    .radius(GaodeAPIConstant.RADIUS) // 设置搜索半径
+                    .sortrule(GaodeAPIConstant.SORT_RULE) // 设置排序规则
                     .build();
 
+            // 根据请求体进行搜索，获取POI信息
             POI poi = getPOI(aroundSearchRequestBody);
 
+            // 发送包含POI信息的消息
             sendMsg(at, group, chain, poi);
         }
     }
@@ -78,13 +93,46 @@ public class EatWhatServiceImpl implements EatWhatService {
         // 在消息链后添加一个空格，为消息内容做分隔
         chain.append(" ");
         // 添加消息内容到消息链
+
         chain.append(new PlainText("来吃这个吧！\n"))
                 .append(new PlainText(poi.getName() + "\n"))
                 .append(new PlainText("这家店就位于：" + poi.getAddress() + "！\n "))
                 .append(new PlainText("快去体验一下吧！"));
+
+        byte[] img = getImage(poi);
+
+        if (img != null) {
+            chain.append(group.uploadImage(ExternalResource.create(Objects.requireNonNull(img))));
+        } else {
+            chain.append(new PlainText(MsgConstant.DONT_HAVE_IMAGE));
+        }
+
         // 构建消息并发送到指定群组
         group.sendMessage(chain.build());
     }
+
+    /**
+     * 根据给定的POI信息获取图片。
+     *
+     * @param poi 包含照片信息的POI对象，不能为null。
+     * @return 如果成功获取到图片，返回图片的字节数组；如果POI没有照片或获取图片失败，则返回null。
+     */
+    private byte[] getImage(POI poi) {
+        // 检查POI是否包含照片
+        if (!poi.getPhotos().isEmpty()) {
+            try {
+                // 尝试从第一个照片的URL获取图片
+                return ApiRequester.getPhoto(poi.getPhotos().get(0).getUrl());
+
+            } catch (IOException e) {
+                // 抓获获取图片过程中的IO异常，并转换为自定义的请求异常抛出
+                throw new RequestException(MsgConstant.IMAGE_GET_ERROR);
+            }
+        }
+        // 如果没有照片或获取失败，则返回null
+        return null;
+    }
+
 
     /**
      * 根据给定的搜索请求体获取一个随机的POI（Point of Interest）。
