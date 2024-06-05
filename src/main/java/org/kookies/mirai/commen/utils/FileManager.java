@@ -137,9 +137,22 @@ public class FileManager {
         return messages;
     }
 
+    /**
+     * 从指定的文件路径读取JSON数组。
+     *
+     * 此方法通过文件路径创建一个BufferedReader，用于读取文件内容。它使用try-with-resources语句，
+     * 确保在操作完成后自动关闭BufferedReader，有效地管理资源，避免了资源泄露。
+     *
+     * @param filePath 文件路径，指定要读取的JSON数组的文件位置。
+     * @return JsonArray 对象，表示从文件中读取的JSON数组。
+     * @throws IOException 如果在读取文件过程中发生错误，则抛出此异常。
+     */
     public static JsonArray readJsonArray(String filePath) throws IOException {
+        // 使用Files.newBufferedReader创建一个BufferedReader，用于读取指定路径的文件。
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
+            // 使用JsonParser.parseReader解析BufferedReader中的JSON内容，并将其转换为JsonArray。
             return JsonParser.parseReader(reader).getAsJsonArray();
         }
     }
+
 }

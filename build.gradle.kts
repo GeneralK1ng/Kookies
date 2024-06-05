@@ -7,7 +7,7 @@ plugins {
     id("io.freefair.lombok") version "8.6"
 }
 
-group = "com.generalk1ng.kookies"
+group = "com.generalk1ng.kookie"
 version = "0.1.5"
 
 repositories {

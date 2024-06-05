@@ -12,7 +12,6 @@
     "voiceApiConfig": {
       "apiUrl": "your apiUrl",
       "ref_audio_path": "your ref_audio_path",
-      "prompt_text": "your prompt_text",
       "gpt_weights_path": "your gpt_weights_path",
       "sovits_weights_path": "your sovits_weights_path"
     }

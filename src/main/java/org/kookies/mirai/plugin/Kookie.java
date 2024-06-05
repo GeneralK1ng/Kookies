@@ -20,11 +20,12 @@ import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
 import org.kookies.mirai.plugin.service.*;
 import org.kookies.mirai.plugin.service.Impl.*;
+import org.kookies.mirai.pojo.entity.VoiceRole;
 
 
-public final class Kookies extends JavaPlugin {
-    public static final Kookies INSTANCE = new Kookies();
-    private static final Log log = LogFactory.getLog(Kookies.class);
+public final class Kookie extends JavaPlugin {
+    public static final Kookie INSTANCE = new Kookie();
+    private static final Log log = LogFactory.getLog(Kookie.class);
 
     // 答案之书
     private final AnswerBookService answerBookService = new AnswerBookServiceImpl();
@@ -41,7 +42,7 @@ public final class Kookies extends JavaPlugin {
     // 语音模块
     private final VoiceService voiceService = new VoiceServiceImpl();
 
-    private Kookies() {
+    private Kookie() {
         super(new JvmPluginDescriptionBuilder(AuthorInfo.ID, AuthorInfo.VERSION)
                 .info(AuthorInfo.INFO)
                 .author(AuthorInfo.AUTHOR)
@@ -50,8 +51,9 @@ public final class Kookies extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Kookie 加载完成！");
+        getLogger().info("Kookie V" + AuthorInfo.VERSION +" 加载完成！");
 
+        // 初始化并更新配置文件
         try {
             ConfigurationLoader.init();
         } catch (Exception e) {
@@ -71,6 +73,18 @@ public final class Kookies extends JavaPlugin {
             CacheManager.readCache(sender.getId(), msg.contentToString());
 
             String[] msgArr = msg.contentToString().split(" ");
+
+            // 角色语音调用，优先判断
+            if (isRoleVoiceCall(msgArr[0])) {
+                // 获取名字
+                String name = msgArr[0].substring(0, msgArr[0].length() - 3);
+                // 获取角色对象
+                VoiceRole voiceRole = voiceService.getVoiceRole(name);
+                // 调用方法
+
+                getLogger().info("角色语音调用, 调用者：" + userName + " 角色：" + name);
+                voiceService.say(sender.getId(), group, voiceRole, msgArr[1]);
+            }
 
             switch (msgArr[0]){
                 // 答案之书
@@ -112,6 +126,22 @@ public final class Kookies extends JavaPlugin {
             getLogger().info(f.getMessage().contentToString());
         });
 
+    }
+
+
+    /**
+     * 判断消息是否为角色语音呼叫指令。
+     * <p>
+     * 本函数用于识别传入的消息是否符合特定的语音呼叫指令格式。具体而言，它检查消息的长度是否超过3个字符
+     * 并且消息是否以预定义的语音呼叫指令结尾。这个功能的设计目的是为了在处理语音呼叫指令时提供一种
+     * 简单的过滤机制，确保只有符合特定格式的消息才会被进一步处理。
+     *
+     * @param msg 待检查的消息字符串。
+     * @return 如果消息长度超过3个字符且以语音呼叫指令结尾，则返回true；否则返回false。
+     */
+    private boolean isRoleVoiceCall(String msg) {
+        // 检查消息长度是否超过3个字符并且是否以语音呼叫指令结尾
+        return msg.length() > 3 && msg.endsWith(FunctionInfo.VOICE_SAY);
     }
 
 }

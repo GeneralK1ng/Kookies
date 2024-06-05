@@ -36,4 +36,6 @@ public class MsgConstant {
     public static final String VOICE_REQUEST_ERROR = "语音请求错误";
 
     public static final String FORMAT_CONVERT_ERROR = "格式转换错误";
+
+    public static final String CANT_FIND_ROLE = "找不到角色";
 }

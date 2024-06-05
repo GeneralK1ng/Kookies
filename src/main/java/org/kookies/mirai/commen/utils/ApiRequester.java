@@ -15,6 +15,7 @@ import org.kookies.mirai.commen.constant.VoiceApiConstant;
 import org.kookies.mirai.commen.enumeration.RequestType;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
+import org.kookies.mirai.pojo.entity.VoiceRole;
 import org.kookies.mirai.pojo.entity.api.baidu.ai.request.ChatRequestBody;
 import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
 import org.kookies.mirai.pojo.entity.api.gaode.request.AroundSearchRequestBody;
@@ -32,8 +33,8 @@ public class ApiRequester {
             .create();
 
     private static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder()
-            .connectTimeout(30000, TimeUnit.MILLISECONDS)
-            .readTimeout(30000, TimeUnit.MILLISECONDS)
+            .connectTimeout(100000, TimeUnit.MILLISECONDS)
+            .readTimeout(100000, TimeUnit.MILLISECONDS)
             .build();
 
     /**
@@ -48,10 +49,11 @@ public class ApiRequester {
      * 5. 获取语音API的响应，并返回语音数据的字节流。
      *
      * @param content 文本内容，用于生成语音。
+     * @param voiceRole 语音角色，用于生成语音。
      * @return 语音数据的字节流。
      * @throws IOException 如果读取配置文件或网络通信发生错误，则抛出此异常。
      */
-    public static byte[] getVoiceWithText (String content) throws IOException {
+    public static byte[] getVoiceWithText (String content, VoiceRole voiceRole) throws IOException {
         // 读取配置文件，获取配置信息
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
         Config config = gson.fromJson(jsonObject, Config.class);
@@ -61,13 +63,13 @@ public class ApiRequester {
                 .text(content)
                 .prompt_lang(VoiceApiConstant.PROMPT_LANG)
                 .text_lang(VoiceApiConstant.TEXT_LANG)
-                .prompt_text(config.getBotInfo().getVoiceApiConfig().getPrompt_text())
-                .gpt_weights_path(config.getBotInfo().getVoiceApiConfig().getGpt_weights_path())
-                .sovits_weights_path(config.getBotInfo().getVoiceApiConfig().getSovits_weights_path())
-                .ref_audio_path(config.getBotInfo().getVoiceApiConfig().getRef_audio_path())
+                .prompt_text(voiceRole.getPromptText())
+                .gpt_weights_path(config.getBotInfo().getVoiceApiConfig().getGpt_weights_path() + "/" + voiceRole.getRole() + ".ckpt")
+                .sovits_weights_path(config.getBotInfo().getVoiceApiConfig().getSovits_weights_path() + "/" + voiceRole.getRole() + ".pth")
+                .ref_audio_path(config.getBotInfo().getVoiceApiConfig().getRef_audio_path() + "/" + voiceRole.getRole() + ".wav")
                 .build();
 
-        // 将设置完成的语音请求对象转换为JSON字符串
+        // 将设置完成的语音请求对象转换为JSON
         String json = gson.toJson(voiceRequest);
         // 创建请求体，指定内容类型为JSON
         RequestBody requestBody = RequestBody.create(VoiceApiConstant.JSON_MEDIA_TYPE, json);

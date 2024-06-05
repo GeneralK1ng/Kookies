@@ -13,4 +13,6 @@ public class VoiceApiConstant implements Serializable {
 
     public static final MediaType JSON_MEDIA_TYPE = MediaType.parse("application/json");
 
+    public static final String DEFAULT_ROLE = "流萤";
+
 }

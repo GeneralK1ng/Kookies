@@ -12,7 +12,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class FormatConverter {
-
+    /**
+     * 将WAV格式的音频数据转换为AMR格式。
+     *
+     * @param wavData WAV格式的音频数据。
+     * @return AMR格式的音频数据。
+     * @throws FormatConvertException 如果转换过程中发生错误。
+     */
     public static byte[] convertWavToAmr(byte[] wavData) {
         try {
             // 将WAV数据写入临时文件
@@ -23,7 +29,14 @@ public class FormatConverter {
 
             // 使用FFmpeg将WAV文件转换为AMR格式
             Path tempAmrFile = Files.createTempFile("temp", ".amr");
-            ProcessBuilder processBuilder = new ProcessBuilder("/home/ffmpeg/target/bin/ffmpeg", "-y", "-i", tempWavFile.toString(), "-ar", "8000", "-ab", "12.2k", "-ac", "1", tempAmrFile.toString());
+            ProcessBuilder processBuilder = new ProcessBuilder("/home/ffmpeg/target/bin/ffmpeg",
+                    "-y",
+                    "-i",
+                    tempWavFile.toString(),
+                    "-ar", "8000",
+                    "-ab", "12.2k",
+                    "-ac", "1",
+                    tempAmrFile.toString());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             System.out.println("Converting WAV to AMR...");
@@ -36,7 +49,7 @@ public class FormatConverter {
                         System.err.println(line);
                     }
                 }
-                throw new FormatConvertException("Error converting WAV to AMR");
+                throw new FormatConvertException(MsgConstant.FORMAT_CONVERT_ERROR);
             }
 
             // 读取转换后的AMR文件数据
@@ -49,8 +62,7 @@ public class FormatConverter {
             return amrData;
         } catch (IOException | InterruptedException e) {
             // 记录异常信息
-            e.printStackTrace();
-            throw new FormatConvertException("Error converting WAV to AMR: " + e.getMessage());
+            throw new FormatConvertException(MsgConstant.FORMAT_CONVERT_ERROR);
         }
     }
 }
