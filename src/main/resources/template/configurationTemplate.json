@@ -14,8 +14,10 @@
       "ref_audio_path": "your ref_audio_path",
       "gpt_weights_path": "your gpt_weights_path",
       "sovits_weights_path": "your sovits_weights_path"
-    }
+    },
+    "runoobToken": "your runoobToken"
   },
+  "maxTodayGirlTimes": 3,
   "adminList": [
     123456789,
     987654321

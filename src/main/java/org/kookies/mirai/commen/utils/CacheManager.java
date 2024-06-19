@@ -92,7 +92,6 @@ public class CacheManager {
                         messageCache.getMessages().add(singleMessage);
                         updateCache(messageCacheDTO);
                         FileManager.write(file.getPath(), gson.toJson(messageCacheDTO));
-                        return messageCache;
                     } else {
                         List<String> messages = new ArrayList<>();
                         messages.add(singleMessage);
@@ -106,9 +105,9 @@ public class CacheManager {
                         updateCache(messageCacheDTO);
                         String json = gson.toJson(messageCacheDTO);
                         FileManager.write(file.getPath(), json);
-                        return messageCache;
                     }
-                // 如果不是今天，则重写缓存
+                    return messageCache;
+                    // 如果不是今天，则重写缓存
                 } else {
                     List<String> messages = new ArrayList<>();
                     messages.add(singleMessage);

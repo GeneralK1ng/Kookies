@@ -5,15 +5,15 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author General_K1ng
  */
 @Data
 @Builder
-public class LuckDayPermissionDTO implements Serializable {
+public class TodayGirlPermissionDTO implements Serializable {
     private LocalDate date;
 
-    private List<Long> sender;
+    private Map<Long, Integer> senderWithTimes;
 }

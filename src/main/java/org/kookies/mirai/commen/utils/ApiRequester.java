@@ -9,19 +9,21 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.json.JSONObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
-import org.kookies.mirai.commen.constant.BaiduApiConstant;
-import org.kookies.mirai.commen.constant.GaodeAPIConstant;
-import org.kookies.mirai.commen.constant.VoiceApiConstant;
+import org.kookies.mirai.commen.constant.*;
 import org.kookies.mirai.commen.enumeration.RequestType;
+import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.VoiceRole;
-import org.kookies.mirai.pojo.entity.api.baidu.ai.request.ChatRequestBody;
-import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
-import org.kookies.mirai.pojo.entity.api.gaode.request.AroundSearchRequestBody;
-import org.kookies.mirai.pojo.entity.api.voice.request.VoiceRequest;
+import org.kookies.mirai.pojo.entity.api.request.baidu.ai.ChatRequestBody;
+import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
+import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
+import org.kookies.mirai.pojo.entity.api.request.runoob.CodeRunRequestBody;
+import org.kookies.mirai.pojo.entity.api.request.voice.VoiceRequest;
+import org.kookies.mirai.pojo.entity.api.response.runoob.CodeRunResponse;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +38,36 @@ public class ApiRequester {
             .connectTimeout(100000, TimeUnit.MILLISECONDS)
             .readTimeout(100000, TimeUnit.MILLISECONDS)
             .build();
+
+
+    public static Response getCodeRunResponse(String code, String lang) throws IOException {
+        JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        Config config = gson.fromJson(jsonObject, Config.class);
+
+        CodeRunRequestBody requestBody = CodeRunRequestBody.builder()
+                .fileext(lang)
+                .code(code)
+                .token(config.getBotInfo().getRunoobToken())
+                .build();
+
+        String encodedCode = URLEncoder.encode(code, "UTF-8");
+
+        requestBody.setCode(encodedCode);
+
+        RequestBody body = RequestBody.create(RunoobApiConstant.FORM_MEDIA_TYPE,
+                "code=" + requestBody.getCode() +
+                        "&fileext=" + requestBody.getFileext() +
+                        "&token=" + requestBody.getToken());
+
+
+        Request request = new Request.Builder()
+                .url(RunoobApiConstant.CODE_RUN_URL)
+                .method(RequestType.POST.getMethod(), body)
+                .addHeader("Content-Type", String.valueOf(RunoobApiConstant.FORM_MEDIA_TYPE))
+                .build();
+
+        return HTTP_CLIENT.newCall(request).execute();
+    }
 
     /**
      * 根据文本内容获取对应的语音数据。

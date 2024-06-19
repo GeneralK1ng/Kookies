@@ -25,8 +25,8 @@ import org.kookies.mirai.plugin.service.EvaluationService;
 import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
 import org.kookies.mirai.pojo.dto.MessageCacheDTO;
 import org.kookies.mirai.pojo.entity.MessageCache;
-import org.kookies.mirai.pojo.entity.api.baidu.ai.response.ChatResponse;
-import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
+import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
+import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @author General_K1ng
+ */
 public class EvaluationServiceImpl implements EvaluationService {
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())

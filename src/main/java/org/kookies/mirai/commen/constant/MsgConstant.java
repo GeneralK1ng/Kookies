@@ -38,4 +38,6 @@ public class MsgConstant {
     public static final String FORMAT_CONVERT_ERROR = "格式转换错误";
 
     public static final String CANT_FIND_ROLE = "找不到角色";
+
+    public static final String TODAY_GIRL_FRIEND_PERMISSION_DUPLICATE_ERROR = "已达上限，傻逼渣男！";
 }

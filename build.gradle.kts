@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.generalk1ng.kookie"
-version = "0.1.5"
+version = "0.1.6"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {
@@ -31,6 +31,11 @@ dependencies {
 
     api("net.mamoe:mirai-silk-converter:0.0.5")
 
-    implementation("com.aliyun:openapiutil:0.2.1")
-    implementation("com.aliyun:tea-openapi:0.3.1")
+//    implementation("com.aliyun:openapiutil:0.2.1")
+//    implementation("com.aliyun:tea-openapi:0.3.3")
+
+//    implementation("ai.djl:api:0.28.0")
+//
+//    implementation("com.kennycason:kumo-core:1.28")
+//    implementation("com.kennycason:kumo-tokenizers:1.28")
 }

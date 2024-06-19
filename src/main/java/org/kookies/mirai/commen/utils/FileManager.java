@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
-import org.kookies.mirai.pojo.entity.api.baidu.ai.request.Message;
+import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
 import java.io.*;
 import java.nio.file.Files;

@@ -19,6 +19,8 @@ public class Permission {
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
+    // TODO 后续需要对每个功能进行权限细分
+
     /**
      * 检查用户是否有权限
      *

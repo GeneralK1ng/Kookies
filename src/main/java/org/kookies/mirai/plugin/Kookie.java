@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kookies.mirai.commen.config.ConfigurationLoader;
 import org.kookies.mirai.commen.constant.MsgConstant;
+import org.kookies.mirai.commen.enumeration.CodeLanguageType;
 import org.kookies.mirai.commen.info.AuthorInfo;
 import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
@@ -23,21 +24,24 @@ import org.kookies.mirai.plugin.service.Impl.*;
 import org.kookies.mirai.pojo.entity.VoiceRole;
 
 
+/**
+ * @author General_K1ng
+ */
 public final class Kookie extends JavaPlugin {
     public static final Kookie INSTANCE = new Kookie();
     private static final Log log = LogFactory.getLog(Kookie.class);
 
-    // 答案之书
-    private final AnswerBookService answerBookService = new AnswerBookServiceImpl();
+    // 娱乐功能
+    private final EntertainmentService entertainmentService = new EntertainmentServiceImpl();
 
-    // 今日运势
-    private final LuckyDayService luckyDayService = new LuckyDayServiceImpl();
+    // 签到接口
+    private final SignInService signInService = new SignInServiceImpl();
 
-    // 评价一下
+    // 评价接口
     private final EvaluationService evaluationService = new EvaluationServiceImpl();
 
-    // 吃什么
-    private final EatWhatService eatWhatService = new EatWhatServiceImpl();
+    // 便利功能接口
+    private final ConvenienceService convenienceService = new ConvenienceServiceImpl();
 
     // 语音模块
     private final VoiceService voiceService = new VoiceServiceImpl();
@@ -90,12 +94,12 @@ public final class Kookie extends JavaPlugin {
                 // 答案之书
                 case FunctionInfo.ANSWER_BOOK:
                     getLogger().info("答案之书, 调用者：" + userName);
-                    answerBookService.answer(sender.getId(), group);
+                    entertainmentService.answer(sender.getId(), group);
                     break;
                 // 今日运势
                 case FunctionInfo.LUCKY_TODAY:
                     getLogger().info("今日运势, 调用者：" + userName);
-                    luckyDayService.luckyDay(sender.getId(), group);
+                    signInService.luckyDay(sender.getId(), group);
                     break;
                 // 评价一下
                 case FunctionInfo.EVALUATE_SOMEBODY:
@@ -108,9 +112,9 @@ public final class Kookie extends JavaPlugin {
                 case FunctionInfo.EAT_WHAT:
                     getLogger().info("吃什么, 调用者：" + userName);
                     if (msgArr.length == 2) {
-                        eatWhatService.eatWhat(sender.getId(), group, msgArr[1], null);
+                        convenienceService.eatWhat(sender.getId(), group, msgArr[1], null);
                     } else if (msgArr.length == 3){
-                        eatWhatService.eatWhat(sender.getId(), group, msgArr[1], msgArr[2]);
+                        convenienceService.eatWhat(sender.getId(), group, msgArr[1], msgArr[2]);
                     }
                     break;
                 // 语音模块
@@ -118,6 +122,25 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("语音模块, 调用者：" + userName);
                     voiceService.say(sender.getId(), group, msgArr[1]);
                     break;
+                // 今日老婆
+                case FunctionInfo.TODAY_GIRL_FRIEND:
+                    getLogger().info("今日老婆, 调用者：" + userName);
+                    signInService.todayGirlFriend(sender.getId(), group);
+                    break;
+                // 代码运行
+                case FunctionInfo.CODE_RUN:
+                    getLogger().info("代码运行, 调用者：" + userName + "，语言：" + msgArr[1]);
+                    // 第二个空格后的所有字符串
+                    String code = msg.contentToString().substring(msg.contentToString().indexOf(" ", 5) + 1);
+                    String lang = CodeLanguageType.getLanguageByName(msgArr[1]);
+                    convenienceService.codeRun(sender.getId(), group, code, lang);
+                    break;
+
+                // 今日词云
+                case FunctionInfo.TODAY_WORD:
+                    getLogger().info("今日词云, 调用者：" + userName);
+                    break;
+
             }
         });
 

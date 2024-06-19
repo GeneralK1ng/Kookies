@@ -2,6 +2,9 @@ package org.kookies.mirai.commen.constant;
 
 import okhttp3.MediaType;
 
+/**
+ * @author General_K1ng
+ */
 public class BaiduApiConstant {
 
     public static final String API_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/yi_34b_chat";

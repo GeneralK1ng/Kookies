@@ -2,6 +2,10 @@ package org.kookies.mirai.commen.enumeration;
 
 import lombok.Getter;
 
+/**
+ * @author General_K1ng
+ */
+
 @Getter
 public enum LanguageType {
     CHINESE("zh"),

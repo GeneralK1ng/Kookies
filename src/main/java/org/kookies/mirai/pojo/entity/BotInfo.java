@@ -1,13 +1,16 @@
 package org.kookies.mirai.pojo.entity;
 
 import lombok.Data;
-import org.kookies.mirai.pojo.entity.api.baidu.BaiduApiConfig;
-import org.kookies.mirai.pojo.entity.api.gaode.GaodeApiConfig;
-import org.kookies.mirai.pojo.entity.api.voice.VoiceApiConfig;
+import org.kookies.mirai.pojo.entity.api.BaiduApiConfig;
+import org.kookies.mirai.pojo.entity.api.GaodeApiConfig;
+import org.kookies.mirai.pojo.entity.api.VoiceApiConfig;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * @author General_K1ng
+ */
 @Data
 public class BotInfo implements Serializable {
 
@@ -25,4 +28,7 @@ public class BotInfo implements Serializable {
 
     // 语音api配置
     private VoiceApiConfig voiceApiConfig;
+
+    // 菜鸟Api
+    private String runoobToken;
 }

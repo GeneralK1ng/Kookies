@@ -18,4 +18,6 @@ public class DataPathInfo {
     public static final String MAP_POI_PATH = "/data/POI.xlsx";
 
     public static final String EAT_WHAT_POI_PATH = "./kookies/data/EatWhatPOI.json";
+
+    public static final String TODAY_GIRL_FRIEND_PERMISSION_PATH = "./kookies/data/TodayGirl.json";
 }

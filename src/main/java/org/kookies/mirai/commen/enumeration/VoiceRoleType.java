@@ -4,6 +4,10 @@ import lombok.Getter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.pojo.entity.VoiceRole;
 
+/**
+ * @author General_K1ng
+ */
+
 @Getter
 public enum VoiceRoleType {
     SPARKLE(new VoiceRole("花火", "可聪明的人从一开始就不会入局。你瞧，我是不是更聪明一点？")),
