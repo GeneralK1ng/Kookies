@@ -2,7 +2,6 @@ package org.kookies.mirai.plugin.service.Impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;
@@ -14,17 +13,16 @@ import okhttp3.Response;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
-import org.kookies.mirai.commen.exceptions.CacheException;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.ApiRequester;
+import org.kookies.mirai.commen.utils.CacheManager;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.EvaluationService;
 import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
-import org.kookies.mirai.pojo.dto.MessageCacheDTO;
-import org.kookies.mirai.pojo.entity.MessageCache;
+import org.kookies.mirai.pojo.entity.PersonalMessage;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
@@ -44,7 +42,7 @@ public class EvaluationServiceImpl implements EvaluationService {
             .serializeNulls()
             .create();
 
-    private static final File cache = new File(DataPathInfo.MESSAGE_CACHE_PATH);
+    private static final File cache = new File(DataPathInfo.MESSAGE_CACHE_DIR_PATH);
 
     /**
      * 评估某人在群组中的信息并发送相关评价消息。
@@ -63,7 +61,7 @@ public class EvaluationServiceImpl implements EvaluationService {
             EvaluateSomebodyDTO dto = EvaluateSomebodyDTO.builder()
                     .nameCard(member.getNameCard())
                     .nick(member.getNick())
-                    .historyMsg(getHistoryMessage(member.getId()))
+                    .historyMsg(getHistoryMessage(member.getId(), group.getId()))
                     .build();
 
             List<Message> botMsg = createBotMsg(dto);
@@ -130,26 +128,12 @@ public class EvaluationServiceImpl implements EvaluationService {
      * @param somebody 用户ID，表示要获取聊天历史的用户。
      * @return 返回该用户的一条聊天历史消息列表。如果找不到相关消息，返回null。
      */
-    private static List<String> getHistoryMessage(Long somebody) {
-        JsonObject jsonObject;
-
-        try {
-            // 尝试从JSON文件中读取聊天缓存数据
-            jsonObject = FileManager.readJsonFile(DataPathInfo.MESSAGE_CACHE_PATH);
-        } catch (IOException e) {
-            // 如果读取失败，抛出缓存异常
-            throw new CacheException(MsgConstant.CACHE_EXCEPTION);
-        }
-
-        // 将JSON对象转换为消息缓存数据传输对象
-        MessageCacheDTO messageCacheDTO = gson.fromJson(jsonObject, MessageCacheDTO.class);
-
-        // 通过流操作过滤出指定用户的聊天消息，并尝试获取消息链表
-        return messageCacheDTO.getMessageCaches().stream()
-                .filter(messageCache -> messageCache.getSender().equals(somebody))
-                .map(MessageCache::getMessages)
-                .findFirst()
-                .orElse(null);
+    private static List<String> getHistoryMessage(Long somebody, Long groupId) {
+        return CacheManager.getPersonalMessageCache(
+                somebody,
+                groupId,
+                LocalDate.now(),
+                PersonalMessage.EVALUATION_HISTORY_SIZE);
     }
 
     /**

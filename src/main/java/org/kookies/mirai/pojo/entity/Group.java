@@ -5,6 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @author General_K1ng
+ */
 @Data
 public class Group implements Serializable {
     // 群号

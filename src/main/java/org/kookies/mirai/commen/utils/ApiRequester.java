@@ -11,7 +11,6 @@ import org.json.JSONObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.*;
 import org.kookies.mirai.commen.enumeration.RequestType;
-import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.VoiceRole;
@@ -20,7 +19,6 @@ import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.runoob.CodeRunRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.voice.VoiceRequest;
-import org.kookies.mirai.pojo.entity.api.response.runoob.CodeRunResponse;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -29,8 +27,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * @author General_K1ng
+ */
 public class ApiRequester {
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
 
@@ -42,7 +43,7 @@ public class ApiRequester {
 
     public static Response getCodeRunResponse(String code, String lang) throws IOException {
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
 
         CodeRunRequestBody requestBody = CodeRunRequestBody.builder()
                 .fileext(lang)
@@ -88,7 +89,7 @@ public class ApiRequester {
     public static byte[] getVoiceWithText (String content, VoiceRole voiceRole) throws IOException {
         // 读取配置文件，获取配置信息
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
 
         // 从配置信息中提取语音API相关的参数，并设置到语音请求对象中
         VoiceRequest voiceRequest = VoiceRequest.builder()
@@ -102,7 +103,7 @@ public class ApiRequester {
                 .build();
 
         // 将设置完成的语音请求对象转换为JSON
-        String json = gson.toJson(voiceRequest);
+        String json = GSON.toJson(voiceRequest);
         // 创建请求体，指定内容类型为JSON
         RequestBody requestBody = RequestBody.create(VoiceApiConstant.JSON_MEDIA_TYPE, json);
 
@@ -130,7 +131,7 @@ public class ApiRequester {
     public static Response sendAroundSearchRequest (AroundSearchRequestBody aroundSearchRequestBody) throws IOException {
         // 从配置文件读取配置信息
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
 
         Request request = new Request.Builder()
                 .url(GaodeAPIConstant.AROUND_SEARCH_API_URL +
@@ -180,7 +181,7 @@ public class ApiRequester {
     public static Response sendAddressRequest(String address, String city) throws IOException{
         // 从配置文件读取配置信息
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
 
         // 构建请求URL并创建请求对象
         Request request = new Request.Builder()
@@ -239,7 +240,7 @@ public class ApiRequester {
                 .build();
 
         // 将构建好的请求体转换为JSON字符串
-        String json = gson.toJson(requestBody);
+        String json = GSON.toJson(requestBody);
 
         // 创建并返回一个包含JSON字符串的请求体对象，用于向百度API发送请求
         return RequestBody.create(BaiduApiConstant.JSON_MEDIA_TYPE, json);
@@ -255,7 +256,7 @@ public class ApiRequester {
      */
     private static String getBaiduAccessToken() throws IOException {
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
         // 构建请求体，包含授权类型、客户端ID和客户端密钥
         RequestBody body = RequestBody.create(BaiduApiConstant.FORM_MEDIA_TYPE,
                 "grant_type=" + BaiduApiConstant.GRANT_TYPE +

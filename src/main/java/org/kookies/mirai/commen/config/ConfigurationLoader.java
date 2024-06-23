@@ -84,14 +84,19 @@ public class ConfigurationLoader {
         try {
             // 检查吃喝点位信息文件是否存在，不存在则创建其父目录并初始化文件
             if (!eatPOI.exists()) {
-                eatPOI.getParentFile().mkdirs(); // 创建父目录
-                List<PoiDTO> poiList = getEatPOI(); // 获取吃喝点位信息
-                JsonArray jsonArray = gson.toJsonTree(poiList).getAsJsonArray(); // 将点位信息转换为Json数组
-                FileManager.write(eatPOI.getPath(), jsonArray.toString()); // 写入Json数组到文件
+                // 创建父目录
+                eatPOI.getParentFile().mkdirs();
+                // 获取吃喝点位信息
+                List<PoiDTO> poiList = getEatPOI();
+                // 将点位信息转换为Json数组
+                JsonArray jsonArray = gson.toJsonTree(poiList).getAsJsonArray();
+                // 写入Json数组到文件
+                FileManager.write(eatPOI.getPath(), jsonArray.toString());
             } else {
                 // 文件存在，直接读取并覆盖文件内容
-                JsonArray jsonArray = FileManager.readJsonArray(eatPOI.getPath()); // 从文件读取Json数组
-                FileManager.write(eatPOI.getPath(), jsonArray.toString()); // 再次写入Json数组到同一文件，实现覆盖
+                JsonArray jsonArray = FileManager.readJsonArray(eatPOI.getPath());
+                // 再次写入Json数组到同一文件，实现覆盖
+                FileManager.write(eatPOI.getPath(), jsonArray.toString());
             }
         } catch (IOException e) {
             // 处理IO异常，抛出配置加载异常

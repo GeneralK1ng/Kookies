@@ -5,6 +5,7 @@ import lombok.Data;
 
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -12,8 +13,10 @@ import java.util.List;
  */
 @Data
 @Builder
-public class MessageCache implements Serializable {
-    private Long sender;
+public class PersonalMessage implements Serializable {
+    private LocalDate date;
 
     private List<String> messages;
+
+    public static final Integer EVALUATION_HISTORY_SIZE = 30;
 }

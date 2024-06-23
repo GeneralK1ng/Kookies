@@ -55,7 +55,7 @@ public final class Kookie extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Kookie V" + AuthorInfo.VERSION +" 加载完成！");
+        log.info("Kookie V" + AuthorInfo.VERSION +" 加载完成！");
 
         // 初始化并更新配置文件
         try {
@@ -73,10 +73,14 @@ public final class Kookie extends JavaPlugin {
             String userName = g.getSenderName();
             Group group = g.getGroup();
 
-            //getLogger().info(msg);
-            CacheManager.readCache(sender.getId(), msg.contentToString());
+            String content = "";
+            if (!msg.serializeToMiraiCode().startsWith("[mirai:")) {
+                content = msg.contentToString();
+            }
 
-            String[] msgArr = msg.contentToString().split(" ");
+            CacheManager.setCache(sender.getId(), group.getId(), content);
+
+            String[] msgArr = content.split(" ");
 
             // 角色语音调用，优先判断
             if (isRoleVoiceCall(msgArr[0])) {

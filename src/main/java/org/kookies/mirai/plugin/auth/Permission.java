@@ -15,8 +15,11 @@ import org.kookies.mirai.pojo.entity.Group;
 import java.io.IOException;
 import java.time.LocalDate;
 
+/**
+ * @author General_K1ng
+ */
 public class Permission {
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
     // TODO 后续需要对每个功能进行权限细分
@@ -36,7 +39,7 @@ public class Permission {
         } catch (IOException e) {
             throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
         }
-        Config config = gson.fromJson(jsonObject, Config.class);
+        Config config = GSON.fromJson(jsonObject, Config.class);
 
         // 检查用户是否在黑名单中
         if (config.getUserBlackList().contains(sender)) {

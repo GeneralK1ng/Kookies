@@ -1,5 +1,8 @@
 package org.kookies.mirai.commen.info;
 
+/**
+ * @author General_K1ng
+ */
 public class DataPathInfo {
     public static final String CONFIG_DIR_PATH = "./kookies";
 
@@ -13,7 +16,7 @@ public class DataPathInfo {
 
     public static final String LUCKY_DAY_PERMISSION_PATH = "./kookies/data/LuckyDay.json";
 
-    public static final String MESSAGE_CACHE_PATH = "./kookies/data/MessageCache.json";
+    public static final String MESSAGE_CACHE_DIR_PATH = "./kookies/data/messageCache";
 
     public static final String MAP_POI_PATH = "/data/POI.xlsx";
 

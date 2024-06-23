@@ -6,7 +6,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
 import org.kookies.mirai.commen.constant.MsgConstant;
-import org.kookies.mirai.commen.exceptions.AnswerBookException;
+import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.plugin.auth.Permission;
@@ -71,7 +71,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
      * 如果读取成功，将返回一个包含答案的Map；如果读取失败或答案为空，则抛出AnswerBookException异常。
      *
      * @return Map<Integer, String> 包含答案的Map，其中键为问题编号，值为对应问题的答案。
-     * @throws AnswerBookException 如果答案文件无法读取或为空，则抛出此异常。
+     * @throws DataLoadException 如果答案文件无法读取或为空，则抛出此异常。
      */
     private Map<Integer, String> readAnswerBook() {
         Map<Integer, String> answerBook;
@@ -80,11 +80,11 @@ public class EntertainmentServiceImpl implements EntertainmentService {
             answerBook = FileManager.readAnswerBook(DataPathInfo.ANSWER_BOOK_PATH);
         } catch (IOException e) {
             // 当读取答案文件发生IO异常时，抛出答案书加载错误异常
-            throw new AnswerBookException(MsgConstant.ANSWER_BOOK_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.ANSWER_BOOK_LOAD_ERROR);
         }
         // 如果读取到的答案书为空，则抛出答案书加载错误异常
         if (answerBook.isEmpty()) {
-            throw new AnswerBookException(MsgConstant.ANSWER_BOOK_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.ANSWER_BOOK_LOAD_ERROR);
         }
         return answerBook;
     }
