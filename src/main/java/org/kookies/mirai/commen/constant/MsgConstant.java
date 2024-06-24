@@ -49,4 +49,6 @@ public class MsgConstant {
     public static final String PERSONAL_MESSAGE_CACHE_WRITE_ERROR = "个人消息缓存写入失败";
 
     public static final String PERSONAL_MESSAGE_CACHE_LOAD_ERROR = "个人消息缓存加载失败";
+
+    public static final String SCHEDULER_EXCEPTION = "定时任务异常";
 }

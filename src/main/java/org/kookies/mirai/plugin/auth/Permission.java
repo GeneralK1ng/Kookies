@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.exceptions.AuthException;
-import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
+import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.pojo.entity.Config;
@@ -37,7 +37,7 @@ public class Permission {
         try {
             jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
         } catch (IOException e) {
-            throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.CONFIG_LOAD_ERROR);
         }
         Config config = GSON.fromJson(jsonObject, Config.class);
 

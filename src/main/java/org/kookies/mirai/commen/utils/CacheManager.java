@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
  * @author General_K1ng
  */
 public class CacheManager {
-
     private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
@@ -35,15 +34,32 @@ public class CacheManager {
 
     public static final File CONFIG = new File(DataPathInfo.CONFIG_PATH);
 
+    // TODO 添加定时任务，使得存储最多七天的消息缓存，每天凌晨进行清理
+
+    /**
+     * 设置缓存方法，用于将发送者发送到群组的消息存储到缓存中。
+     * <p>
+     * 此方法首先检查消息是否为空，然后初始化群组目录，并更新个人消息缓存。
+     * 如果在缓存更新过程中发生异常，将抛出CacheException异常。
+     *
+     * @param sender 消息发送者ID，用于标识消息的来源。
+     * @param group 消息目标群组ID，用于标识消息的接收方。
+     * @param message 消息内容，需要被存储到缓存中的文本信息。
+     * @throws CacheException 如果缓存更新过程中发生异常，则抛出此异常。
+     */
     public static void setCache(Long sender, Long group, String message) {
         try {
+            // 检查消息是否为空，如果为空则直接返回，不进行缓存存储。
             if (message == null || message.isEmpty()) {
                 return;
             }
 
+            // 初始化群组目录，确保后续缓存更新操作的文件目录正确。
             initDir(group);
+            // 更新个人消息缓存，将消息存储到指定发送者和群组的缓存中。
             updatePersonalMessageCache(sender, group, message);
         } catch (Exception e) {
+            // 如果在缓存操作过程中发生异常，抛出自定义的CacheException异常。
             // 如果初始化过程中发生异常，抛出授权异常
             throw new CacheException(MsgConstant.CACHE_EXCEPTION);
         }
@@ -260,18 +276,31 @@ public class CacheManager {
         return config;
     }
 
+    /**
+     * 从文件中加载个人消息列表。
+     * <p>
+     * 这个方法尝试从指定文件中读取JSON数组，并将其转换为个人消息的列表。
+     * 如果文件读取失败，将抛出数据加载异常。
+     *
+     * @param senderFile 文件对象，表示要读取的JSON文件。
+     * @return 返回一个个人消息的列表，列表中的每个元素都是一个PersonalMessage对象。
+     * @throws DataLoadException 如果文件读取失败，则抛出此异常。
+     */
     private static List<PersonalMessage> getPersonalMsgList(File senderFile) {
         JsonArray jsonArray;
         try {
+            // 尝试读取文件中的JSON数组。
             jsonArray = FileManager.readJsonArray(senderFile.getPath());
         } catch (IOException e) {
+            // 如果发生IO异常，抛出自定义的数据加载异常。
             throw new DataLoadException(MsgConstant.PERSONAL_MESSAGE_CACHE_LOAD_ERROR);
         }
 
+        // 使用TypeToken来指定GSON解析的类型为List<PersonalMessage>。
         Type listType = new TypeToken<List<PersonalMessage>>() {}.getType();
+        // 从JSON数组中解析出个人消息列表。
         return GSON.fromJson(jsonArray, listType);
     }
-
 
     /**
      * 根据群组列表和指定的群组ID，获取群组名称和标签的字符串表示。

@@ -19,9 +19,11 @@ import org.kookies.mirai.commen.enumeration.CodeLanguageType;
 import org.kookies.mirai.commen.info.AuthorInfo;
 import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
+import org.kookies.mirai.commen.utils.JobScheduler;
 import org.kookies.mirai.plugin.service.*;
 import org.kookies.mirai.plugin.service.Impl.*;
 import org.kookies.mirai.pojo.entity.VoiceRole;
+import org.quartz.SchedulerException;
 
 
 /**
@@ -55,11 +57,14 @@ public final class Kookie extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        log.info("Kookie V" + AuthorInfo.VERSION +" 加载完成！");
+         log.info("Kookie V" + AuthorInfo.VERSION +" 加载完成！");
 
-        // 初始化并更新配置文件
+        // 加载配置文件并初始化定时任务
         try {
             ConfigurationLoader.init();
+            JobScheduler.start();
+        } catch (SchedulerException e) {
+            getLogger().error(MsgConstant.SCHEDULER_EXCEPTION, e);
         } catch (Exception e) {
             getLogger().error(MsgConstant.CONFIG_LOAD_ERROR, e);
         }

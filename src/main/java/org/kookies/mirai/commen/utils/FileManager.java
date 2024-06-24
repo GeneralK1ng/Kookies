@@ -12,8 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * @author General_K1ng
+ */
 public class FileManager {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
     /**
      * 从指定路径读取模板文件的内容。
@@ -61,7 +64,7 @@ public class FileManager {
      */
     public static void writeJsonFile(String filePath, JsonObject jsonObject) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
-            gson.toJson(jsonObject, writer);
+            GSON.toJson(jsonObject, writer);
         }
     }
 
@@ -102,6 +105,7 @@ public class FileManager {
 
     /**
      * 从指定文件路径读取信息，构造并返回一个包含消息的列表。
+     * <p>
      * 每两行被视为一对对话，其中奇数行代表用户的消息，偶数行代表助手的消息。
      *
      * @param filePath 要读取的文件的路径。文件应包含一对对的用户和助手的对话。
@@ -139,7 +143,7 @@ public class FileManager {
 
     /**
      * 从指定的文件路径读取JSON数组。
-     *
+     * <p>
      * 此方法通过文件路径创建一个BufferedReader，用于读取文件内容。它使用try-with-resources语句，
      * 确保在操作完成后自动关闭BufferedReader，有效地管理资源，避免了资源泄露。
      *
