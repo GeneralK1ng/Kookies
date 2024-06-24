@@ -9,14 +9,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.GaodeAPIConstant;
 import org.kookies.mirai.commen.constant.MsgConstant;
-import org.kookies.mirai.commen.exceptions.ConfigurationLoadException;
+import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.pojo.dto.PoiDTO;
 
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,18 +23,21 @@ import java.util.Objects;
 import java.time.format.DateTimeFormatter;
 
 
+/**
+ * @author General_K1ng
+ */
 public class ConfigurationLoader {
-    private static final Gson gson = new GsonBuilder()
+    private static final Gson GSON = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
 
-    private static final File config = new File(DataPathInfo.CONFIG_PATH);
+    private static final File CONFIG = new File(DataPathInfo.CONFIG_PATH);
 
-    private static final File eatPOI = new File(DataPathInfo.EAT_WHAT_POI_PATH);
+    private static final File EAT_POI = new File(DataPathInfo.EAT_WHAT_POI_PATH);
 
-    private static final DataFormatter dataFormatter = new DataFormatter();
+    private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     /**
      * 对外开放的方法
      * 用于加载配置文件
@@ -43,10 +45,10 @@ public class ConfigurationLoader {
     public static void init() {
         // 如果配置文件不存在，则按照 resources/template下的 configurationTemplate.json 创建一个配置文件
         try {
-            if (!config.exists()){
-                config.getParentFile().mkdirs();
+            if (!CONFIG.exists()){
+                CONFIG.getParentFile().mkdirs();
                 String templateFile = FileManager.readTemplateFile(DataPathInfo.CONFIG_TEMPLATE_PATH);
-                FileManager.write(config.getPath(), templateFile);
+                FileManager.write(CONFIG.getPath(), templateFile);
             } else {
                 update();
             }
@@ -54,11 +56,11 @@ public class ConfigurationLoader {
             initEatPOI();
 
             // 读取配置文件并解析为 Config 对象
-//            JsonObject jsonObject = FileManager.readJsonFile(config.getPath());
-//            Config config = gson.fromJson(jsonObject, Config.class);
-//            ConfigContext.setConfig(config);  // 设置到 ThreadLocal 中
+//            JsonObject jsonObject = FileManager.readJsonFile(CONFIG.getPath());
+//            Config CONFIG = GSON.fromJson(jsonObject, Config.class);
+//            ConfigContext.setConfig(CONFIG);  // 设置到 ThreadLocal 中
         } catch (IOException e) {
-            throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.CONFIG_LOAD_ERROR);
         }
     }
 
@@ -67,15 +69,16 @@ public class ConfigurationLoader {
      */
     private static void update() {
         try {
-            JsonObject jsonObject = FileManager.readJsonFile(config.getPath());
-            FileManager.writeJsonFile(config.getPath(), jsonObject);
+            JsonObject jsonObject = FileManager.readJsonFile(CONFIG.getPath());
+            FileManager.writeJsonFile(CONFIG.getPath(), jsonObject);
         } catch (IOException e) {
-            throw new ConfigurationLoadException(MsgConstant.CONFIG_UPDATE_ERROR);
+            throw new DataLoadException(MsgConstant.CONFIG_UPDATE_ERROR);
         }
     }
 
     /**
      * 初始化吃喝点位信息。
+     * <p>
      * 该方法首先检查吃喝点位信息文件是否存在，如果不存在，则创建文件并写入从外部获取的点位信息；
      * 如果文件存在，则直接读取并覆盖该文件内容。
      * 该过程如果出现IO异常，则抛出配置加载异常。
@@ -83,30 +86,36 @@ public class ConfigurationLoader {
     private static void initEatPOI() {
         try {
             // 检查吃喝点位信息文件是否存在，不存在则创建其父目录并初始化文件
-            if (!eatPOI.exists()) {
-                eatPOI.getParentFile().mkdirs(); // 创建父目录
-                List<PoiDTO> poiList = getEatPOI(); // 获取吃喝点位信息
-                JsonArray jsonArray = gson.toJsonTree(poiList).getAsJsonArray(); // 将点位信息转换为Json数组
-                FileManager.write(eatPOI.getPath(), jsonArray.toString()); // 写入Json数组到文件
+            if (!EAT_POI.exists()) {
+                // 创建父目录
+                EAT_POI.getParentFile().mkdirs();
+                // 获取吃喝点位信息
+                List<PoiDTO> poiList = getEatPoi();
+                // 将点位信息转换为Json数组
+                JsonArray jsonArray = GSON.toJsonTree(poiList).getAsJsonArray();
+                // 写入Json数组到文件
+                FileManager.write(EAT_POI.getPath(), jsonArray.toString());
             } else {
                 // 文件存在，直接读取并覆盖文件内容
-                JsonArray jsonArray = FileManager.readJsonArray(eatPOI.getPath()); // 从文件读取Json数组
-                FileManager.write(eatPOI.getPath(), jsonArray.toString()); // 再次写入Json数组到同一文件，实现覆盖
+                JsonArray jsonArray = FileManager.readJsonArray(EAT_POI.getPath());
+                // 再次写入Json数组到同一文件，实现覆盖
+                FileManager.write(EAT_POI.getPath(), jsonArray.toString());
             }
         } catch (IOException e) {
             // 处理IO异常，抛出配置加载异常
-            throw new ConfigurationLoadException(MsgConstant.CONFIG_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.CONFIG_LOAD_ERROR);
         }
     }
 
 
     /**
      * 获取指定类别（美食）的POI（Point of Interest）数据。
+     * <p>
      * 该方法从预先配置的Excel文件中读取数据，筛选出符合指定大类别的POI信息，并返回这些信息的列表。
      *
      * @return List<PoiDTO> 返回一个包含符合条件的POI数据传输对象的列表。
      */
-    private static List<PoiDTO> getEatPOI() {
+    private static List<PoiDTO> getEatPoi() {
         // 目标类别，即要筛选的POI的大类别
         String targetCategory = GaodeAPIConstant.TARGET_CATEGORY;
 
@@ -144,7 +153,7 @@ public class ConfigurationLoader {
         // 捕获处理Excel文件读取过程中可能发生的IOException
         } catch (IOException e) {
             // 抛出配置加载异常，封装原始的IOException
-            throw new ConfigurationLoadException(MsgConstant.EXCEL_LOAD_ERROR);
+            throw new DataLoadException(MsgConstant.EXCEL_LOAD_ERROR);
         }
 
         return poiList;
@@ -152,6 +161,7 @@ public class ConfigurationLoader {
 
     /**
      * 获取单元格的值。
+     * <p>
      * 此方法根据单元格的类型（数值、字符串、布尔值、公式、空单元格或错误值）来返回相应的值。
      * 对于数值单元格，如果它被格式化为日期，则以指定的日期格式返回日期值；
      * 否则，以字符串形式返回数值。
@@ -167,10 +177,10 @@ public class ConfigurationLoader {
                 // 如果单元格被格式化为日期，则以字符串形式返回日期值
                 if (DateUtil.isCellDateFormatted(cell)) {
                     LocalDate date = cell.getLocalDateTimeCellValue().toLocalDate();
-                    return dateFormatter.format(date);
+                    return DATE_FORMATTER.format(date);
                 } else {
                     // 如果不是日期格式的数值，以字符串形式返回
-                    return dataFormatter.formatCellValue(cell);
+                    return DATA_FORMATTER.formatCellValue(cell);
                 }
             case STRING:
                 // 对于字符串类型的单元格，直接返回字符串值

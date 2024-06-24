@@ -5,10 +5,10 @@ import org.kookies.mirai.commen.exceptions.base.BaseException;
 /**
  * @author General_K1ng
  */
-public class DataLoadException extends BaseException {
-    public DataLoadException() {
+public class SchedulerJobException extends BaseException {
+    public SchedulerJobException() {
     }
-    public DataLoadException(String message) {
+    public SchedulerJobException(String message) {
         super(message);
     }
 }

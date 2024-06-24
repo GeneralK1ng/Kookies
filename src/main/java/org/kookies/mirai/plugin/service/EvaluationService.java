@@ -3,6 +3,9 @@ package org.kookies.mirai.plugin.service;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 
+/**
+ * @author General_K1ng
+ */
 public interface EvaluationService {
     /**
      * 评价某人

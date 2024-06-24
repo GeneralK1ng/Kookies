@@ -1,5 +1,8 @@
 package org.kookies.mirai.commen.constant;
 
+/**
+ * @author General_K1ng
+ */
 public class MsgConstant {
     public static final String CONFIG_LOAD_ERROR = "配置文件加载失败";
 
@@ -40,4 +43,12 @@ public class MsgConstant {
     public static final String CANT_FIND_ROLE = "找不到角色";
 
     public static final String TODAY_GIRL_FRIEND_PERMISSION_DUPLICATE_ERROR = "已达上限，傻逼渣男！";
+
+    public static final String MAKE_DIR_ERROR = "创建目录失败";
+
+    public static final String PERSONAL_MESSAGE_CACHE_WRITE_ERROR = "个人消息缓存写入失败";
+
+    public static final String PERSONAL_MESSAGE_CACHE_LOAD_ERROR = "个人消息缓存加载失败";
+
+    public static final String SCHEDULER_EXCEPTION = "定时任务异常";
 }
