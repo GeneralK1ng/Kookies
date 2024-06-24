@@ -21,5 +21,7 @@ public class FunctionInfo {
 
     public static final String TODAY_WORD = "今日词云";
 
+    public static final String WEEK_WORD = "本周词云";
+
 
 }

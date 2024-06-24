@@ -148,10 +148,13 @@ public class CacheManager {
         String dirName = getDirName(getConfig().getEnableGroupList(), group);
         // 创建群组目录的文件对象
         File groupDir = new File(MESSAGE_CACHE_DIR, dirName);
+
+        File msgDir = new File(groupDir, "msg");
+
         // 构建发送者文件名
         String senderFileName = sender + ".json";
         // 创建发送者文件对象
-        return new File(groupDir, senderFileName);
+        return new File(msgDir, senderFileName);
     }
 
 
@@ -245,6 +248,15 @@ public class CacheManager {
         // 检查群组目录是否存在，如果不存在，则尝试创建它
         if (!groupDir.exists()) {
             boolean created = groupDir.mkdirs();
+            if (!created) {
+                throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
+            }
+        }
+
+        File msgDir = new File(groupDir, "msg");
+
+        if (!msgDir.exists()) {
+            boolean created = msgDir.mkdirs();
             if (!created) {
                 throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
             }

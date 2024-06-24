@@ -39,6 +39,6 @@ dependencies {
 //    implementation("com.kennycason:kumo-core:1.28")
 //    implementation("com.kennycason:kumo-tokenizers:1.28")
 
-//    implementation("org.ansj:ansj_seg:5.1.1")
+    implementation("org.ansj:ansj_seg:5.1.6")
     implementation("org.quartz-scheduler:quartz:2.3.2")
 }
