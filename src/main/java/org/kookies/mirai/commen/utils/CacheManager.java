@@ -34,8 +34,6 @@ public class CacheManager {
 
     public static final File CONFIG = new File(DataPathInfo.CONFIG_PATH);
 
-    // TODO 添加定时任务，使得存储最多七天的消息缓存，每天凌晨进行清理
-
     /**
      * 设置缓存方法，用于将发送者发送到群组的消息存储到缓存中。
      * <p>
