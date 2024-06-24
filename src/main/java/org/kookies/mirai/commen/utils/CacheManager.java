@@ -149,7 +149,7 @@ public class CacheManager {
         // 创建群组目录的文件对象
         File groupDir = new File(MESSAGE_CACHE_DIR, dirName);
 
-        File msgDir = new File(groupDir, "msg");
+        File msgDir = new File(groupDir, DataPathInfo.MSG_DIR);
 
         // 构建发送者文件名
         String senderFileName = sender + ".json";
@@ -159,32 +159,118 @@ public class CacheManager {
 
 
     /**
-     * 处理个人消息文件，将新消息添加到文件中。
-     * <p>
-     * 该方法用于读取指定文件中的个人消息，将新消息添加到消息列表后，再将更新后的消息写回文件。
-     * 如果在读取或写入文件过程中发生IO异常，将分别抛出DataLoadException和DataWriteException异常。
+     * 处理个人消息文件已存在的情况。
+     * 当个人消息文件已经存在时，本方法将决定是更新最新消息还是添加一条新消息。
+     * 这取决于新消息的时间戳是否与文件中最新消息的时间戳相同。
      *
-     * @param senderFile 保存个人消息的文件，文件内容为JSON格式的个人消息对象。
-     * @param message 新的消息内容，将被添加到个人消息列表中。
-     * @throws DataWriteException 如果写入文件失败，则抛出此异常。
+     * @param senderFile 消息发送者的文件，用于存储个人消息列表。
+     * @param message 新的消息内容。
      */
     private static void handlePersonalMsgFileExists(File senderFile, String message) {
-
+        // 从文件中加载现有的个人消息列表。
         List<PersonalMessage> personalMsgList = getPersonalMsgList(senderFile);
 
+        // 获取个人消息列表中的最新消息。
         PersonalMessage latestMessage = personalMsgList.get(personalMsgList.size() - 1);
-        if (latestMessage.getDate().equals(LocalDate.now())) {
-            latestMessage.getMessages().add(message);
-        } else {
-            personalMsgList.add(PersonalMessage.builder()
-                    .messages(new LinkedList<>(Collections.singletonList(message)))
-                    .date(LocalDate.now())
-                    .build());
-        }
+        // 统计新消息中的单词数量。
+        Map<String, Integer> newWordCount = TextAnalyzer.countWords(message);
 
+        // 检查最新消息是否是今天发送的。
+        if (latestMessage.getDate().equals(LocalDate.now())) {
+            // 如果是今天发送的，更新最新消息。
+            updateLatestMessage(latestMessage, message, senderFile, newWordCount);
+        } else {
+            // 如果不是今天发送的，添加一条新消息。
+            addNewPersonalMessage(personalMsgList, message, senderFile, newWordCount);
+        }
+        // 将更新后的个人消息列表写回文件。
+        writePersonalMessageList(senderFile, personalMsgList);
+    }
+
+    /**
+     * 更新最新的消息并更新发送者文件中的单词计数。
+     * <p>
+     * 此方法用于接收最新的消息，并将其添加到消息列表中。同时，它还会更新发送者文件中单词的计数，
+     * 以确保单词频率的统计是最新的。这在处理文本消息并希望跟踪特定发送者使用的单词频率时非常有用。
+     *
+     * @param latestMessage 最新的个人信息，包含消息列表。此方法将新消息添加到此列表中。
+     * @param message 新的消息文本，将被添加到最新的消息列表中。
+     * @param senderFile 发送者文件，其中包含以前发送的消息和相应的单词计数。此文件将被更新以包含新消息的单词计数。
+     * @param newWordCount 一个映射，用于存储新消息中的单词及其计数。此映射将与发送者文件中的现有单词计数合并。
+     */
+    private static void updateLatestMessage(PersonalMessage latestMessage, String message, File senderFile, Map<String, Integer> newWordCount) {
+        latestMessage.getMessages().add(message);
+        Map<String, Integer> existingWordCount = getWordMap(senderFile);
+
+        existingWordCount.forEach((word, count) -> newWordCount.merge(word, count, Integer::sum));
+
+        writeWordMap(senderFile, newWordCount);
+    }
+
+    /**
+     * 添加新的个人消息到消息列表中，并更新发送者的单词计数。
+     * <p>
+     * 此方法用于在个人消息列表中添加一条新消息，并根据发送的消息更新发送者的单词计数。
+     * 新消息的内容是固定的单条消息，日期为当前日期。
+     *
+     * @param personalMsgList 个人消息列表，新消息将被添加到这个列表中。
+     * @param message 新消息的内容。
+     * @param senderFile 发送者的信息文件，用于更新发送者的单词计数。
+     * @param newWordCount 发送者新产生的单词计数，用于更新发送者的单词统计信息。
+     */
+    private static void addNewPersonalMessage(List<PersonalMessage> personalMsgList, String message, File senderFile, Map<String, Integer> newWordCount) {
+        // 创建一个新的个人消息对象，包含消息内容和创建日期。
+        PersonalMessage newMessage = PersonalMessage.builder()
+                .messages(new LinkedList<>(Collections.singletonList(message)))
+                .date(LocalDate.now())
+                .build();
+
+        // 将新消息添加到个人消息列表中。
+        personalMsgList.add(newMessage);
+        // 更新发送者的单词计数信息。
+        writeWordMap(senderFile, newWordCount);
+    }
+
+
+    /**
+     * 将单词计数映射写入到文件中。
+     * <p>
+     * 此方法封装了将单词计数映射写入到特定文件路径的过程。如果写入过程中发生IO异常，
+     * 则会抛出一个自定义的数据写入异常。
+     *
+     * @param senderFile 源文件，用于计算目标文件路径。此文件不直接用于写入操作，
+     *                   但其路径被用于生成单词计数映射的目标文件路径。
+     * @param wordCount 单词计数映射，一个字符串到整数的映射，其中字符串是单词，
+     *                  整数是该单词在文件中出现的次数。这个映射将被写入到文件中。
+     * @throws DataWriteException 如果写入单词计数映射到文件时发生IO异常，则抛出此异常。
+     */
+    private static void writeWordMap(File senderFile, Map<String, Integer> wordCount) {
         try {
-            FileManager.write(senderFile.getPath(), GSON.toJsonTree(personalMsgList).toString());
+            // 将单词计数映射写入到由senderFile计算得到的目标文件路径中
+            FileManager.writeWordMap2Txt(getWordMapFilePath(senderFile), wordCount);
         } catch (IOException e) {
+            // 捕获到IO异常时，抛出一个自定义的数据写入异常
+            throw new DataWriteException(MsgConstant.WORD_MAP_WRITE_ERROR);
+        }
+    }
+
+
+    /**
+     * 将个人消息列表写入到文件中。
+     * <p>
+     * 此方法用于将个人消息列表的JSON字符串写入到指定文件中，以供后续读取和使用。
+     * 如果在写入过程中发生IO异常，将抛出一个自定义的数据写入异常。
+     *
+     * @param senderFile 指定的文件对象，个人消息列表将被写入到这个文件中。
+     * @param personalMsgList 待写入的个人消息列表，列表中的每个元素都是一个个人消息对象。
+     * @throws DataWriteException 如果写入过程中发生IO异常，则抛出此异常。
+     */
+    private static void writePersonalMessageList(File senderFile, List<PersonalMessage> personalMsgList) {
+        try {
+            // 使用GSON将个人消息列表转换为JSON树，然后将JSON树转换为字符串形式，最后写入到文件中。
+            FileManager.write(senderFile.getPath(), GSON.toJsonTree(personalMsgList).getAsJsonArray().toString());
+        } catch (IOException e) {
+            // 如果在写入过程中发生IO异常，抛出自定义的异常。
             throw new DataWriteException(MsgConstant.PERSONAL_MESSAGE_CACHE_WRITE_ERROR);
         }
     }
@@ -212,14 +298,40 @@ public class CacheManager {
 
         List<PersonalMessage> personalMessageList = new ArrayList<>();
         personalMessageList.add(personalMessage);
-        String jsonArray = GSON.toJsonTree(personalMessageList).getAsJsonArray().toString();
 
+        Map<String, Integer> wordCount = TextAnalyzer.countWords(message);
+
+        writePersonalMessageList(senderFile, personalMessageList);
+        writeWordMap(senderFile, wordCount);
+    }
+
+    /**
+     * 根据给定的文件对象生成单词映射文件的路径。
+     * <p>
+     * 此方法用于确定存储单词频率统计的文件的位置和名称。
+     * 它通过遍历给定文件的父目录结构，最终在最上层父目录中创建一个以当前日期命名的文本文件。
+     *
+     * @param senderFile 发送者文件，用于确定单词映射文件的相对位置。
+     * @return 返回单词映射文件的完整路径。
+     */
+    private static String getWordMapFilePath(File senderFile) {
+        // 获取发送者文件的父目录，即消息文件所在的目录
+        File msgDir = new File(senderFile.getParent());
+        // 获取消息目录的父目录，即群组目录
+        File groupDir = new File(msgDir.getParent());
+        // 以当前日期为名在群组目录中创建一个单词映射文件
+        File wordMapFile = new File(groupDir, LocalDate.now().toString() + ".txt");
+
+        // 返回单词映射文件的完整路径
+        return wordMapFile.getPath();
+    }
+
+    private static Map<String, Integer> getWordMap(File senderFile) {
+        String wordMapFilePath = getWordMapFilePath(senderFile);
         try {
-            // 将JSON字符串写入到指定的文件中。
-            FileManager.write(senderFile.getPath(), jsonArray);
+            return FileManager.readWordMap(wordMapFilePath);
         } catch (IOException e) {
-            // 如果写入文件时发生IO异常，抛出自定义的DataWriteException异常。
-            throw new DataWriteException(MsgConstant.PERSONAL_MESSAGE_CACHE_WRITE_ERROR);
+            throw new DataLoadException(MsgConstant.WORD_MAP_LOAD_ERROR);
         }
     }
 
@@ -253,7 +365,7 @@ public class CacheManager {
             }
         }
 
-        File msgDir = new File(groupDir, "msg");
+        File msgDir = new File(groupDir, DataPathInfo.MSG_DIR);
 
         if (!msgDir.exists()) {
             boolean created = msgDir.mkdirs();

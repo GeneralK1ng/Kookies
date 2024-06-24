@@ -102,6 +102,28 @@ public class FileManager {
         return answerBook;
     }
 
+    /**
+     * 将Map对象的内容写入到指定路径的文本文件中。
+     * <p>
+     * 每个键值对占一行，以冒号分隔键和值。
+     *
+     * @param filePath 要写入的文本文件的路径。
+     * @param map 要写入的Map对象，其键值对将被写入文件。
+     * @throws IOException 如果文件写入过程中发生错误。
+     */
+    public static void writeWordMap2Txt(String filePath, Map<String, Integer> map) throws IOException {
+        // 使用BufferedWriter来优化文件写入操作，通过 FileWriter 将数据写入到指定文件。
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            // 遍历map的每个键值对，并将它们写入文件中。
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                // 写入键值对，以冒号分隔键和值，每对键值对占一行。
+                writer.write(entry.getKey() + ":" + entry.getValue() + "\n");
+            }
+        }
+        // try-with-resources语句确保BufferedWriter在操作完成后被正确关闭。
+    }
+
+
 
     /**
      * 从指定文件路径读取信息，构造并返回一个包含消息的列表。
@@ -156,6 +178,39 @@ public class FileManager {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
             // 使用JsonParser.parseReader解析BufferedReader中的JSON内容，并将其转换为JsonArray。
             return JsonParser.parseReader(reader).getAsJsonArray();
+        }
+    }
+
+    /**
+     * 从指定的文件路径读取单词映射。
+     * 每行映射文件内容格式为 "单词:计数"，本方法将解析这些内容并构建一个单词到计数的映射。
+     *
+     * @param wordMapFilePath 映射文件的路径，相对于类路径。
+     * @return 包含单词及其出现次数的映射。
+     * @throws IOException 如果读取文件时发生错误。
+     */
+    public static Map<String, Integer> readWordMap(String wordMapFilePath) throws IOException {
+        // 初始化一个HashMap来存储单词和它们的出现次数。
+        Map<String, Integer> wordMap = new HashMap<>();
+        // 使用try-with-resources语句确保文件资源在使用后能被正确关闭。
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                // 通过类路径获取资源流，确保文件路径是有效的类路径资源。
+                Objects.requireNonNull(FileManager.class.getResourceAsStream(wordMapFilePath))))) {
+            String line;
+            // 循环读取文件的每一行直到文件结束。
+            while ((line = reader.readLine()) != null) {
+                // 使用冒号分隔每行的单词和计数。
+                String[] parts = line.split(":");
+                // 确保分割结果包含两个部分：单词和计数。
+                if (parts.length == 2) {
+                    // 移除空白字符，以确保单词和计数的准确性。
+                    String word = parts[0].trim();
+                    int count = Integer.parseInt(parts[1].trim());
+                    // 将单词和计数添加到映射中
+                    wordMap.put(word, count);
+                }
+            }
+            return wordMap;
         }
     }
 

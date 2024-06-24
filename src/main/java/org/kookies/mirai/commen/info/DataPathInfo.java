@@ -18,6 +18,8 @@ public class DataPathInfo {
 
     public static final String MESSAGE_CACHE_DIR_PATH = "./kookies/data/messageCache";
 
+    public static final String MSG_DIR = "msg";
+
     public static final String MAP_POI_PATH = "/data/POI.xlsx";
 
     public static final String EAT_WHAT_POI_PATH = "./kookies/data/EatWhatPOI.json";

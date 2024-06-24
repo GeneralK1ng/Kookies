@@ -24,7 +24,7 @@ public interface EntertainmentService {
     void evaluateSomebody(Member sender, Group group, String somebody);
 
     /**
-     * 本周词云
+     * 今日词云
      *
      * @param group 群
      */
