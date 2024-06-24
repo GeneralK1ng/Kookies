@@ -125,6 +125,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
 
     /**
      * 创建机器人消息列表。
+     * <p>
      * 此方法会首先尝试从指定路径读取机器人的信息，如果读取成功，将基于传入的DTO生成一条用户消息，并将其添加到机器人信息列表中。
      * 如果在读取机器人信息过程中发生IO异常，将抛出数据加载异常。
      *

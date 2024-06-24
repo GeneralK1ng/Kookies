@@ -117,7 +117,7 @@ public class FileManager {
             // 遍历map的每个键值对，并将它们写入文件中。
             for (Map.Entry<String, Integer> entry : map.entrySet()) {
                 // 写入键值对，以冒号分隔键和值，每对键值对占一行。
-                writer.write(entry.getKey() + ":" + entry.getValue() + "\n");
+                writer.write(entry.getValue() + ":" + entry.getKey() + "\n");
             }
         }
         // try-with-resources语句确保BufferedWriter在操作完成后被正确关闭。
@@ -204,8 +204,8 @@ public class FileManager {
                 // 确保分割结果包含两个部分：单词和计数。
                 if (parts.length == 2) {
                     // 移除空白字符，以确保单词和计数的准确性。
-                    String word = parts[0].trim();
-                    int count = Integer.parseInt(parts[1].trim());
+                    int count = Integer.parseInt(parts[0].trim());
+                    String word = parts[1].trim();
                     // 将单词和计数添加到映射中
                     wordMap.put(word, count);
                 }

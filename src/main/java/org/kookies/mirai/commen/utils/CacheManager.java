@@ -108,6 +108,24 @@ public class CacheManager {
     }
 
     /**
+     * 根据群组ID获取当天单词计数文件。
+     * <p>
+     * 此方法用于生成当天的单词计数文件，文件名包含日期，以确保唯一性，并存储在指定群组的目录中。
+     * 如果群组目录不存在，将会创建该目录。
+     *
+     * @param groupId 群组的唯一标识符。用于确定文件存储的目录。
+     * @return 返回一个File对象，代表当天的单词计数文件。
+     */
+    public static File getTodayWordCountFile(Long groupId) {
+        // 根据配置中启用的群组列表和群组ID，获取群组目录名
+        String groupDirName = getGroupDirName(getConfig().getEnableGroupList(), groupId);
+
+        // 使用当前日期作为文件名后缀，创建当天的单词计数文件对象
+        return new File(groupDirName, LocalDate.now() + ".txt");
+    }
+
+
+    /**
      * 更新个人消息缓存。
      * <p>
      * 当发送者具有相应权限时，此方法用于更新指定群组中发送者的个人消息缓存。
@@ -145,11 +163,11 @@ public class CacheManager {
      */
     private static File getPersonalMsgFile(Long sender, Long group) {
         // 根据群组ID获取群组目录的名称
-        String dirName = getDirName(getConfig().getEnableGroupList(), group);
+        String dirName = getGroupDirName(getConfig().getEnableGroupList(), group);
         // 创建群组目录的文件对象
         File groupDir = new File(MESSAGE_CACHE_DIR, dirName);
 
-        File msgDir = new File(groupDir, DataPathInfo.MSG_DIR);
+        File msgDir = new File(groupDir, DataPathInfo.PERSONAL_MSG_DIR);
 
         // 构建发送者文件名
         String senderFileName = sender + ".json";
@@ -320,20 +338,33 @@ public class CacheManager {
         // 获取消息目录的父目录，即群组目录
         File groupDir = new File(msgDir.getParent());
         // 以当前日期为名在群组目录中创建一个单词映射文件
-        File wordMapFile = new File(groupDir, LocalDate.now().toString() + ".txt");
+        File wordMapFile = new File(groupDir, LocalDate.now() + ".txt");
 
         // 返回单词映射文件的完整路径
         return wordMapFile.getPath();
     }
 
+    /**
+     * 获取单词映射表。
+     * <p>
+     * 本方法旨在从指定的文件中加载单词映射表，该映射表用于后续的文本处理任务。
+     *
+     * @param senderFile 文件对象，表示要加载映射表的文件。
+     * @return 返回一个Map，其中包含单词与对应出现次数的映射。
+     * @throws DataLoadException 如果加载过程中发生IO异常，则抛出此异常。
+     */
     private static Map<String, Integer> getWordMap(File senderFile) {
+        // 根据发送者文件生成单词映射表文件的路径
         String wordMapFilePath = getWordMapFilePath(senderFile);
         try {
+            // 从文件中读取并返回单词映射表
             return FileManager.readWordMap(wordMapFilePath);
         } catch (IOException e) {
+            // 在发生IO异常时，抛出自定义的数据加载异常
             throw new DataLoadException(MsgConstant.WORD_MAP_LOAD_ERROR);
         }
     }
+
 
     /**
      * 初始化消息缓存目录
@@ -354,10 +385,9 @@ public class CacheManager {
         }
         // 获取配置中启用的群组列表
         List<Group> groups = getConfig().getEnableGroupList();
-        // 根据群组列表和指定群组ID创建群组目录
-        File groupDir = new File(MESSAGE_CACHE_DIR, getDirName(groups, group));
 
-        // 检查群组目录是否存在，如果不存在，则尝试创建它
+        // 根据群组列表和指定群组ID创建群组目录
+        File groupDir = new File(MESSAGE_CACHE_DIR, getGroupDirName(groups, group));
         if (!groupDir.exists()) {
             boolean created = groupDir.mkdirs();
             if (!created) {
@@ -365,10 +395,17 @@ public class CacheManager {
             }
         }
 
-        File msgDir = new File(groupDir, DataPathInfo.MSG_DIR);
-
+        File msgDir = new File(groupDir, DataPathInfo.PERSONAL_MSG_DIR);
         if (!msgDir.exists()) {
             boolean created = msgDir.mkdirs();
+            if (!created) {
+                throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
+            }
+        }
+
+        File wordCloudDir = new File(DataPathInfo.WORD_CLOUD_PATH);
+        if (!wordCloudDir.exists()) {
+            boolean created = wordCloudDir.mkdirs();
             if (!created) {
                 throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
             }
@@ -434,7 +471,7 @@ public class CacheManager {
      * @param groupId 指定的群组ID，用于在群组列表中查找特定群组。
      * @return 返回拼接好的字符串，格式为"群组ID-标签1,标签2,..."，如果没有标签，则只有群组ID。
      */
-    private static String getDirName(List<Group> groups, Long groupId) {
+    private static String getGroupDirName(List<Group> groups, Long groupId) {
         StringBuilder sb = new StringBuilder();
         // 使用流式编程查找指定ID的群组，并处理找到的群组
         groups.stream()

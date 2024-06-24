@@ -91,6 +91,7 @@ public class ConvenienceServiceImpl implements ConvenienceService {
 
     /**
      * 执行代码运行操作。
+     * <p>
      * 当收到执行代码的请求时，此方法将被调用。它首先检查发送者是否有权限执行代码，
      * 然后运行代码并准备回复消息。如果发送者有权限，它将构造消息并发送回群组。
      *
@@ -311,6 +312,7 @@ public class ConvenienceServiceImpl implements ConvenienceService {
 
     /**
      * 获取一个随机的POI（兴趣点）类型。
+     * <p>
      * 该方法从预先加载的POI列表中随机选择一个POI，并返回其类型。
      *
      * @return 返回随机选择的POI的新类型。
