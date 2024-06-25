@@ -2,16 +2,26 @@ package org.kookies.mirai.plugin.service.Impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.kennycason.kumo.CollisionMode;
+import com.kennycason.kumo.WordCloud;
+import com.kennycason.kumo.WordFrequency;
+import com.kennycason.kumo.bg.CircleBackground;
+import com.kennycason.kumo.font.scale.SqrtFontScalar;
+import com.kennycason.kumo.nlp.FrequencyFileLoader;
+import com.kennycason.kumo.palette.ColorPalette;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.message.code.MiraiCode;
+import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
+import net.mamoe.mirai.utils.ExternalResource;
 import okhttp3.Response;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
+import org.kookies.mirai.commen.constant.WordCloudConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.RequestException;
@@ -26,10 +36,13 @@ import org.kookies.mirai.pojo.entity.PersonalMessage;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
 
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,9 +113,54 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         }
     }
 
+    /**
+     * 在指定的群组中发送今日词云图。
+     * <p>
+     * 此方法首先验证发送者是否有权限在该群组中发送消息，然后生成并发送今日词云图。
+     *
+     * @param sender 发送者ID，用于权限验证。
+     * @param group 目标群组，用于获取群组ID和在该群组中发送消息。
+     */
     @Override
-    public void todayWord(Group group) {
+    public void todayWord(Long sender, Group group) {
+        // 断言发送者是否有权限在该群组中发送消息。
+        assert Permission.checkPermission(sender, group.getId());
 
+        // 初始化消息构建器，用于构建发送的消息。
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+        // 从缓存中获取今日词云数据文件。
+        File todayWordCount = CacheManager.getTodayWordCountFile(group.getId());
+        // 根据词云数据文件生成词云图像文件。
+        File wordCloudImg = generateWordCloudImgFile(todayWordCount);
+
+        // 读取词云图像文件的数据，准备上传。
+        byte[] imgData = getWordCloudImg(wordCloudImg);
+        // 将图像数据转换为群组可发送的消息对象。
+        Image image = group.uploadImage(ExternalResource.create(Objects.requireNonNull(imgData)));
+
+        // 使用消息构建器发送图像消息。
+        sendMsg(chain, group, image);
+
+    }
+
+    /**
+     * 发送消息到群组中。
+     * <p>
+     * 使用MessageChainBuilder构建消息链，其中包括一段文本消息和一张图片消息。
+     * 这个方法展示了如何通过链式操作构造复杂的消息并发送到指定的群组中。
+     *
+     * @param chain MessageChainBuilder实例，用于构建消息链。
+     * @param group 目标群组，接收消息的群组对象。
+     * @param image 图片消息，待发送的图片对象。
+     */
+    private void sendMsg(MessageChainBuilder chain, Group group, Image image) {
+        // 向消息链中添加一段文本消息，内容为"正在统计分析..."
+        chain.append(new PlainText("正在统计分析..."));
+        // 发送构建好的消息链到群组中
+        group.sendMessage(chain.build());
+        // 发送图片消息到群组中
+        group.sendMessage(image);
     }
 
     /**
@@ -122,6 +180,111 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         // 构建消息并发送到指定群组
         group.sendMessage(chain.build());
     }
+
+    /**
+     * 获取词云图像的字节数据
+     * <p>
+     * 此方法尝试从指定的文件路径中读取词云图像文件，将其以字节数据的形式返回，
+     * 如果在读取文件过程中发生IO异常，将抛出一个自定义的DataLoadException异常，
+     * 异常信息指明了图像获取失败
+     *
+     * @param wordCloudImg 文件对象，表示待读取的词云图像文件
+     * @return 词云图像的字节数据数组
+     * @throws DataLoadException 如果读取图像文件时发生IO异常，则抛出此异常
+     */
+    private static byte[] getWordCloudImg(File wordCloudImg) {
+        try {
+            // 尝试根据文件路径读取图像文件。
+            return FileManager.readImageFile(wordCloudImg.getPath());
+        } catch (IOException e) {
+            // 发生IO异常时，抛出自定义异常。
+            throw new DataLoadException(MsgConstant.IMAGE_GET_ERROR);
+        }
+    }
+
+    /**
+     * 根据词频数据生成词云图像文件。
+     * <p>
+     * 此方法首先加载词频数据，然后基于这些数据生成词云对象，并最终保存词云图像。
+     * 这一过程包括了数据的加载、词云的生成配置以及图像的保存。
+     *
+     * @param wordCount 词频数据文件，用于生成词云的基础数据。
+     * @return 返回保存词云图像的文件对象。
+     */
+    private static File generateWordCloudImgFile(File wordCount) {
+        // 加载词频数据，为词云生成准备必要的信息。
+        List<WordFrequency> wordFrequencies = loadWordFrequencies(wordCount);
+        // 创建词云对象，配置词云的样式、布局等。
+        WordCloud wordCloud = generateWordCloud();
+        // 基于加载的词频数据，构建词云对象。
+        wordCloud.build(wordFrequencies);
+
+        // 保存词云图像文件。
+        return saveWordCloud(wordCloud);
+    }
+
+
+    /**
+     * 保存词云图。
+     * <p>
+     * 该方法用于将给定的词云对象保存为PNG图像文件。文件名基于当前日期生成，确保唯一性。
+     * 词云图保存在预定义的路径下，路径在DataPathInfo类中定义。
+     *
+     * @param wordCloud 词云对象，包含词云的布局和样式信息。
+     * @return 返回保存后的词云图文件对象。
+     */
+    private static File saveWordCloud(WordCloud wordCloud) {
+        // 生成基于当前日期的文件名，确保文件名的唯一性。
+        String fileName = LocalDate.now() + ".png";
+        // 创建词云图文件对象，指定文件保存的路径和文件名。
+        File wordCloudImg = new File(DataPathInfo.WORD_CLOUD_PATH, fileName);
+        // 将词云对象写入到文件中，实现词云图的保存。
+        wordCloud.writeToFile(wordCloudImg.getPath());
+        // 返回保存后的词云图文件对象。
+        return wordCloudImg;
+    }
+
+    /**
+     * 生成词云实例。
+     * <p>
+     * 此方法根据预定义的常量初始化并配置词云实例，包括词云的大小、内边距、颜色调色板、背景形状及字体大小缩放规则。
+     * 目的是创建一个具有特定视觉效果和布局规则的词云，以便进一步处理和渲染词语数据。
+     *
+     * @return WordCloud 返回已配置的词云实例。
+     */
+    private static WordCloud generateWordCloud() {
+        Dimension dimension = new Dimension(WordCloudConstant.IMAGE_WIDTH, WordCloudConstant.IMAGE_HEIGHT);
+        WordCloud wordCloud = new WordCloud(dimension, CollisionMode.PIXEL_PERFECT);
+
+        wordCloud.setPadding(WordCloudConstant.PADDING);
+        wordCloud.setColorPalette(new ColorPalette(WordCloudConstant.COLOR_PALETTE));
+        wordCloud.setBackground(new CircleBackground(WordCloudConstant.BACKGROUND_RADIUS));
+        wordCloud.setFontScalar(new SqrtFontScalar(WordCloudConstant.FONT_SCALAR_MIN, WordCloudConstant.FONT_SCALAR_MAX));
+        wordCloud.setBackgroundColor(WordCloudConstant.BACKGROUND_COLOR);
+        return wordCloud;
+    }
+
+    /**
+     * 加载单词频率列表。
+     * <p>
+     * 从指定的文件中加载单词及其出现的频率，用于后续的单词频率统计和处理。
+     *
+     * @param wordCountFile 包含单词频率数据的文件。此文件应由FrequencyFileLoader能够解析的格式定义。
+     * @return 返回一个List，包含加载的每个单词及其频率的WordFrequency对象。
+     * @throws DataLoadException 如果加载文件过程中发生IO异常，则抛出此异常。
+     */
+    private static List<WordFrequency> loadWordFrequencies(File wordCountFile) {
+        // 创建FrequencyFileLoader实例，用于加载单词频率文件。
+        FrequencyFileLoader frequencyFileLoader = new FrequencyFileLoader();
+        try {
+            // 调用load方法加载单词频率文件，并返回加载的结果。
+            return frequencyFileLoader.load(wordCountFile);
+        } catch (IOException e) {
+            // 如果在加载过程中发生IO异常，抛出自定义的DataLoadException异常。
+            throw new DataLoadException(MsgConstant.WORD_FREQUENCY_LOAD_ERROR);
+        }
+    }
+
 
     /**
      * 创建机器人消息列表。

@@ -26,7 +26,8 @@ public interface EntertainmentService {
     /**
      * 今日词云
      *
+     * @param sender 发送者
      * @param group 群
      */
-    void todayWord(Group group);
+    void todayWord(Long sender, Group group);
 }

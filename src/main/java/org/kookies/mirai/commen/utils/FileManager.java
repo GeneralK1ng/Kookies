@@ -40,6 +40,17 @@ public class FileManager {
         return contentBuilder.toString();
     }
 
+    /**
+     * 读取指定路径的图像文件，并返回其字节数据。
+     *
+     * @param filePath 图像文件的路径。
+     * @return 图像文件的字节数据数组。
+     * @throws IOException 如果读取文件时发生错误。
+     */
+    public static byte[] readImageFile(String filePath) throws IOException {
+        // 通过FilePath获取文件路径，然后读取所有字节并返回
+        return Files.readAllBytes(Paths.get(filePath));
+    }
 
     /**
      * 从指定的文件路径读取JSON文件内容，并将其解析为一个JsonObject。

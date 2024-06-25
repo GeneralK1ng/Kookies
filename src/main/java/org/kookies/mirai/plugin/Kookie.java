@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.kookies.mirai.commen.config.ConfigurationLoader;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.CodeLanguageType;
+import org.kookies.mirai.commen.exceptions.SchedulerJobException;
 import org.kookies.mirai.commen.info.AuthorInfo;
 import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
@@ -23,7 +24,6 @@ import org.kookies.mirai.commen.utils.JobScheduler;
 import org.kookies.mirai.plugin.service.*;
 import org.kookies.mirai.plugin.service.Impl.*;
 import org.kookies.mirai.pojo.entity.VoiceRole;
-import org.quartz.SchedulerException;
 
 
 /**
@@ -60,7 +60,7 @@ public final class Kookie extends JavaPlugin {
         try {
             ConfigurationLoader.init();
             JobScheduler.start();
-        } catch (SchedulerException e) {
+        } catch (SchedulerJobException e) {
             getLogger().error(MsgConstant.SCHEDULER_EXCEPTION, e);
         } catch (Exception e) {
             getLogger().error(MsgConstant.CONFIG_LOAD_ERROR, e);
@@ -151,7 +151,7 @@ public final class Kookie extends JavaPlugin {
                 // 今日词云
                 case FunctionInfo.TODAY_WORD:
                     getLogger().info("今日词云, 调用者：" + userName);
-                    entertainmentService.todayWord(group);
+                    entertainmentService.todayWord(sender.getId(), group);
                     break;
 
             }
