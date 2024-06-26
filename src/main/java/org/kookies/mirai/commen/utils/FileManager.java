@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
+import org.kookies.mirai.commen.exceptions.CacheException;
+import org.kookies.mirai.commen.info.DataPathInfo;
+import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
 import java.io.*;
@@ -146,6 +150,8 @@ public class FileManager {
      * @throws IOException 如果读取文件时发生输入输出异常。
      */
     public static List<Message> readBotInfo (String filePath) throws IOException {
+        Config config = getConfig();
+
         List<Message> messages = new ArrayList<>();
         // 使用BufferedReader从指定的文件路径读取信息
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -154,6 +160,10 @@ public class FileManager {
             int index = 1;
             // 遍历文件的每一行
             while ((line = reader.readLine()) != null) {
+                line = line.replace("{name}", config.getBotInfo().getName())
+                        .replace("{age}", String.valueOf(config.getBotInfo().getAge()))
+                        .replace("{owner}", config.getBotInfo().getOwner());
+
                 Message message;
                 // 根据行的索引奇偶性，区分用户消息和助手消息
                 if (index % 2 == 1) {
@@ -224,5 +234,20 @@ public class FileManager {
             return wordMap;
         }
     }
+
+    private static Config getConfig() {
+        Config config;
+        try {
+            // 从指定路径读取JSON配置文件
+            JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+            // 使用GSON从JSON对象解析出Config对象
+            config = GSON.fromJson(jsonObject, Config.class);
+        } catch (Exception e) {
+            // 抓住任何异常，并抛出自定义的CacheException异常
+            throw new CacheException(MsgConstant.CACHE_EXCEPTION);
+        }
+        return config;
+    }
+
 
 }

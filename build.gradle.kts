@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.generalk1ng.kookie"
-version = "0.1.6"
+version = "0.1.7"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {

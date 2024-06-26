@@ -2,6 +2,8 @@
   "botInfo": {
     "birthday": "2024-05-20",
     "name": "Kookie",
+    "owner": "your owner",
+    "age": 16,
     "baiduApiConfig": {
       "apiKey": "your apiKey",
       "secretKey": "your secretKey"
