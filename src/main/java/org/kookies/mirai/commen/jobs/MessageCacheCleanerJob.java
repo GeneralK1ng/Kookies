@@ -75,7 +75,8 @@ public class MessageCacheCleanerJob implements Job {
      */
     private void clearPersonalCaches(File groupDir, LocalDate cutoffDate) {
         // 列出groupDir下所有的个人缓存文件
-        File[] personalCaches = groupDir.listFiles();
+        File msgDir = new File(groupDir, DataPathInfo.PERSONAL_MSG_DIR);
+        File[] personalCaches = msgDir.listFiles();
         // 如果personalCaches不为空，则遍历每个个人缓存文件
         if (personalCaches != null) {
             for (File personalCache : personalCaches) {

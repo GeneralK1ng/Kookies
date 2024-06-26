@@ -51,4 +51,10 @@ public class MsgConstant {
     public static final String PERSONAL_MESSAGE_CACHE_LOAD_ERROR = "个人消息缓存加载失败";
 
     public static final String SCHEDULER_EXCEPTION = "定时任务异常";
+
+    public static final String WORD_MAP_LOAD_ERROR = "词频统计加载失败";
+
+    public static final String WORD_MAP_WRITE_ERROR = "词频统计写入失败";
+
+    public static final String WORD_FREQUENCY_LOAD_ERROR = "词云词频文件加载失败";
 }

@@ -16,6 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.kookies.mirai.commen.config.ConfigurationLoader;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.CodeLanguageType;
+import org.kookies.mirai.commen.exceptions.SchedulerJobException;
 import org.kookies.mirai.commen.info.AuthorInfo;
 import org.kookies.mirai.commen.info.FunctionInfo;
 import org.kookies.mirai.commen.utils.CacheManager;
@@ -23,7 +24,6 @@ import org.kookies.mirai.commen.utils.JobScheduler;
 import org.kookies.mirai.plugin.service.*;
 import org.kookies.mirai.plugin.service.Impl.*;
 import org.kookies.mirai.pojo.entity.VoiceRole;
-import org.quartz.SchedulerException;
 
 
 /**
@@ -38,9 +38,6 @@ public final class Kookie extends JavaPlugin {
 
     // 签到接口
     private final SignInService signInService = new SignInServiceImpl();
-
-    // 评价接口
-    private final EvaluationService evaluationService = new EvaluationServiceImpl();
 
     // 便利功能接口
     private final ConvenienceService convenienceService = new ConvenienceServiceImpl();
@@ -63,7 +60,7 @@ public final class Kookie extends JavaPlugin {
         try {
             ConfigurationLoader.init();
             JobScheduler.start();
-        } catch (SchedulerException e) {
+        } catch (SchedulerJobException e) {
             getLogger().error(MsgConstant.SCHEDULER_EXCEPTION, e);
         } catch (Exception e) {
             getLogger().error(MsgConstant.CONFIG_LOAD_ERROR, e);
@@ -105,18 +102,21 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("答案之书, 调用者：" + userName);
                     entertainmentService.answer(sender.getId(), group);
                     break;
+
                 // 今日运势
                 case FunctionInfo.LUCKY_TODAY:
                     getLogger().info("今日运势, 调用者：" + userName);
                     signInService.luckyDay(sender.getId(), group);
                     break;
+
                 // 评价一下
                 case FunctionInfo.EVALUATE_SOMEBODY:
                     String somebody = msg.serializeToMiraiCode().split(" ")[1];
                     //getLogger().info(somebody);
                     getLogger().info("评价一下, 调用者：" + userName + " 被评价者：" + somebody);
-                    evaluationService.evaluateSomebody(sender, group, somebody);
+                    entertainmentService.evaluateSomebody(sender, group, somebody);
                     break;
+
                 // 吃什么
                 case FunctionInfo.EAT_WHAT:
                     getLogger().info("吃什么, 调用者：" + userName);
@@ -126,16 +126,19 @@ public final class Kookie extends JavaPlugin {
                         convenienceService.eatWhat(sender.getId(), group, msgArr[1], msgArr[2]);
                     }
                     break;
+
                 // 语音模块
                 case FunctionInfo.VOICE_SAY:
                     getLogger().info("语音模块, 调用者：" + userName);
                     voiceService.say(sender.getId(), group, msgArr[1]);
                     break;
+
                 // 今日老婆
                 case FunctionInfo.TODAY_GIRL_FRIEND:
                     getLogger().info("今日老婆, 调用者：" + userName);
                     signInService.todayGirlFriend(sender.getId(), group);
                     break;
+
                 // 代码运行
                 case FunctionInfo.CODE_RUN:
                     getLogger().info("代码运行, 调用者：" + userName + "，语言：" + msgArr[1]);
@@ -148,6 +151,7 @@ public final class Kookie extends JavaPlugin {
                 // 今日词云
                 case FunctionInfo.TODAY_WORD:
                     getLogger().info("今日词云, 调用者：" + userName);
+                    entertainmentService.todayWord(sender.getId(), group);
                     break;
 
             }

@@ -20,6 +20,12 @@ public class BotInfo implements Serializable {
     // 机器人名字
     private String name;
 
+    // 主人
+    private String owner;
+
+    // 年龄
+    private Integer age;
+
     // 百度api配置
     private BaiduApiConfig baiduApiConfig;
 

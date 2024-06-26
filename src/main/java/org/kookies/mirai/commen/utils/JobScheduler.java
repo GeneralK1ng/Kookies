@@ -17,9 +17,9 @@ public class JobScheduler {
      * 它创建了一个清理消息缓存的任务（Job）和一个触发器（Trigger），
      * 并将它们安排在默认的调度器中执行。任务每天凌晨2点执行一次，用于清理过期的消息缓存。
      *
-     * @throws SchedulerException 如果调度过程中发生错误
+     * @throws SchedulerJobException 如果调度过程中发生错误
      */
-    public static void start() throws SchedulerException{
+    public static void start() throws SchedulerJobException{
         try {
             // 创建JobDetail对象，定义清理消息缓存的任务
             JobDetail job = JobBuilder.newJob(MessageCacheCleanerJob.class)
@@ -37,7 +37,7 @@ public class JobScheduler {
             scheduler.start();
             // 将任务和触发器注册到调度器中
             scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             // 如果调度过程中发生错误，抛出自定义异常
             throw new SchedulerJobException(MsgConstant.SCHEDULER_EXCEPTION);
         }

@@ -4,7 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
+import org.kookies.mirai.commen.exceptions.CacheException;
+import org.kookies.mirai.commen.info.DataPathInfo;
+import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
 import java.io.*;
@@ -40,6 +44,17 @@ public class FileManager {
         return contentBuilder.toString();
     }
 
+    /**
+     * 读取指定路径的图像文件，并返回其字节数据。
+     *
+     * @param filePath 图像文件的路径。
+     * @return 图像文件的字节数据数组。
+     * @throws IOException 如果读取文件时发生错误。
+     */
+    public static byte[] readImageFile(String filePath) throws IOException {
+        // 通过FilePath获取文件路径，然后读取所有字节并返回
+        return Files.readAllBytes(Paths.get(filePath));
+    }
 
     /**
      * 从指定的文件路径读取JSON文件内容，并将其解析为一个JsonObject。
@@ -102,6 +117,28 @@ public class FileManager {
         return answerBook;
     }
 
+    /**
+     * 将Map对象的内容写入到指定路径的文本文件中。
+     * <p>
+     * 每个键值对占一行，以冒号分隔键和值。
+     *
+     * @param filePath 要写入的文本文件的路径。
+     * @param map 要写入的Map对象，其键值对将被写入文件。
+     * @throws IOException 如果文件写入过程中发生错误。
+     */
+    public static void writeWordMap2Txt(String filePath, Map<String, Integer> map) throws IOException {
+        // 使用BufferedWriter来优化文件写入操作，通过 FileWriter 将数据写入到指定文件。
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            // 遍历map的每个键值对，并将它们写入文件中。
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                // 写入键值对，以冒号分隔键和值，每对键值对占一行。
+                writer.write(entry.getValue() + ":" + entry.getKey() + "\n");
+            }
+        }
+        // try-with-resources语句确保BufferedWriter在操作完成后被正确关闭。
+    }
+
+
 
     /**
      * 从指定文件路径读取信息，构造并返回一个包含消息的列表。
@@ -113,6 +150,8 @@ public class FileManager {
      * @throws IOException 如果读取文件时发生输入输出异常。
      */
     public static List<Message> readBotInfo (String filePath) throws IOException {
+        Config config = getConfig();
+
         List<Message> messages = new ArrayList<>();
         // 使用BufferedReader从指定的文件路径读取信息
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
@@ -121,6 +160,10 @@ public class FileManager {
             int index = 1;
             // 遍历文件的每一行
             while ((line = reader.readLine()) != null) {
+                line = line.replace("{name}", config.getBotInfo().getName())
+                        .replace("{age}", String.valueOf(config.getBotInfo().getAge()))
+                        .replace("{owner}", config.getBotInfo().getOwner());
+
                 Message message;
                 // 根据行的索引奇偶性，区分用户消息和助手消息
                 if (index % 2 == 1) {
@@ -158,5 +201,53 @@ public class FileManager {
             return JsonParser.parseReader(reader).getAsJsonArray();
         }
     }
+
+    /**
+     * 从指定的文件路径读取单词映射。
+     * 每行映射文件内容格式为 "单词:计数"，本方法将解析这些内容并构建一个单词到计数的映射。
+     *
+     * @param wordMapFilePath 映射文件的路径，相对于类路径。
+     * @return 包含单词及其出现次数的映射。
+     * @throws IOException 如果读取文件时发生错误。
+     */
+    public static Map<String, Integer> readWordMap(String wordMapFilePath) throws IOException {
+        // 初始化一个HashMap来存储单词和它们的出现次数。
+        Map<String, Integer> wordMap = new HashMap<>();
+        // 使用try-with-resources语句确保文件资源在使用后能被正确关闭。
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                // 通过类路径获取资源流，确保文件路径是有效的类路径资源。
+                Objects.requireNonNull(FileManager.class.getResourceAsStream(wordMapFilePath))))) {
+            String line;
+            // 循环读取文件的每一行直到文件结束。
+            while ((line = reader.readLine()) != null) {
+                // 使用冒号分隔每行的单词和计数。
+                String[] parts = line.split(":");
+                // 确保分割结果包含两个部分：单词和计数。
+                if (parts.length == 2) {
+                    // 移除空白字符，以确保单词和计数的准确性。
+                    int count = Integer.parseInt(parts[0].trim());
+                    String word = parts[1].trim();
+                    // 将单词和计数添加到映射中
+                    wordMap.put(word, count);
+                }
+            }
+            return wordMap;
+        }
+    }
+
+    private static Config getConfig() {
+        Config config;
+        try {
+            // 从指定路径读取JSON配置文件
+            JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+            // 使用GSON从JSON对象解析出Config对象
+            config = GSON.fromJson(jsonObject, Config.class);
+        } catch (Exception e) {
+            // 抓住任何异常，并抛出自定义的CacheException异常
+            throw new CacheException(MsgConstant.CACHE_EXCEPTION);
+        }
+        return config;
+    }
+
 
 }
