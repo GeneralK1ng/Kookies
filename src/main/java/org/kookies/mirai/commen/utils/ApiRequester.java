@@ -40,7 +40,17 @@ public class ApiRequester {
             .readTimeout(100000, TimeUnit.MILLISECONDS)
             .build();
 
-
+    /**
+     * 发送代码运行请求并返回响应。
+     * <p>
+     * 该方法通过调用一个外部API，将指定的代码片段以指定的编程语言运行，并返回运行结果。
+     * 使用配置文件中的令牌进行身份验证，确保请求的安全性。
+     *
+     * @param code 要运行的代码片段。
+     * @param lang 代码片段的编程语言。
+     * @return 返回代码运行的响应。
+     * @throws IOException 如果读取配置文件或发送网络请求时发生错误。
+     */
     public static Response getCodeRunResponse(String code, String lang) throws IOException {
         JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
         Config config = GSON.fromJson(jsonObject, Config.class);
@@ -248,9 +258,9 @@ public class ApiRequester {
 
     /**
      * 获取百度API的访问令牌（AccessToken）。
+     * <p>
      * 该方法通过向百度API的授权端点发送POST请求，使用客户端的API密钥和密钥密码进行身份验证，
      * 以获取可用于API调用的访问令牌。
-     * <p>
      * @return 返回从百度API授权服务器获取的访问令牌字符串。
      * @throws IOException 如果网络请求过程中发生IO异常。
      */

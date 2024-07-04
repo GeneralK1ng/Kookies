@@ -53,7 +53,7 @@ public class TextAnalyzer {
         // 通过流处理方式对单词进行统计
         return words.entrySet().stream()
                 // 按照单词值（即分词结果）进行分组
-                .collect(Collectors.groupingBy(Map.Entry::getValue,
+                .collect(Collectors.groupingBy(Map.Entry::getKey,
                 // 对每个分组计算出现的总次数，这里使用summingInt函数来实现
                 Collectors.summingInt(e -> 1)));
     }

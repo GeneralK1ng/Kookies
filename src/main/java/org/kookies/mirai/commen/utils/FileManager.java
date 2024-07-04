@@ -1,9 +1,6 @@
 package org.kookies.mirai.commen.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.exceptions.CacheException;
@@ -195,11 +192,14 @@ public class FileManager {
      * @throws IOException 如果在读取文件过程中发生错误，则抛出此异常。
      */
     public static JsonArray readJsonArray(String filePath) throws IOException {
-        // 使用Files.newBufferedReader创建一个BufferedReader，用于读取指定路径的文件。
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
-            // 使用JsonParser.parseReader解析BufferedReader中的JSON内容，并将其转换为JsonArray。
-            return JsonParser.parseReader(reader).getAsJsonArray();
+        JsonArray jsonArray = null;
+        try (FileReader reader = new FileReader(filePath)) {
+            JsonElement jsonElement = JsonParser.parseReader(reader);
+            if (jsonElement.isJsonArray()) {
+                jsonArray = jsonElement.getAsJsonArray();
+            }
         }
+        return jsonArray;
     }
 
     /**
@@ -211,28 +211,21 @@ public class FileManager {
      * @throws IOException 如果读取文件时发生错误。
      */
     public static Map<String, Integer> readWordMap(String wordMapFilePath) throws IOException {
-        // 初始化一个HashMap来存储单词和它们的出现次数。
         Map<String, Integer> wordMap = new HashMap<>();
-        // 使用try-with-resources语句确保文件资源在使用后能被正确关闭。
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                // 通过类路径获取资源流，确保文件路径是有效的类路径资源。
-                Objects.requireNonNull(FileManager.class.getResourceAsStream(wordMapFilePath))))) {
+
+        try (BufferedReader bf = new BufferedReader(new FileReader(wordMapFilePath))) {
             String line;
-            // 循环读取文件的每一行直到文件结束。
-            while ((line = reader.readLine()) != null) {
-                // 使用冒号分隔每行的单词和计数。
+            while ((line = bf.readLine()) != null) {
                 String[] parts = line.split(":");
-                // 确保分割结果包含两个部分：单词和计数。
                 if (parts.length == 2) {
-                    // 移除空白字符，以确保单词和计数的准确性。
                     int count = Integer.parseInt(parts[0].trim());
                     String word = parts[1].trim();
-                    // 将单词和计数添加到映射中
                     wordMap.put(word, count);
                 }
             }
-            return wordMap;
         }
+        System.out.println("Word map loaded successfully.");
+        return wordMap;
     }
 
     private static Config getConfig() {

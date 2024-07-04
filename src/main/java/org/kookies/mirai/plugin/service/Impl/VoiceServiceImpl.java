@@ -16,6 +16,9 @@ import org.kookies.mirai.pojo.entity.VoiceRole;
 
 import java.io.IOException;
 
+/**
+ * @author General_K1ng
+ */
 public class VoiceServiceImpl implements VoiceService {
     /**
      * 对指定ID的消息内容进行语音合成并发送给群组。
@@ -59,15 +62,30 @@ public class VoiceServiceImpl implements VoiceService {
         return VoiceRoleType.getRoleByName(name);
     }
 
+    /**
+     * 对指定的群组和用户说某句话，可能会根据用户的角色播放不同的语音。
+     * <p>
+     * 如果用户没有特定的语音角色，则默认处理；如果用户有权限，则根据内容和角色生成语音并播放。
+     *
+     * @param id 用户ID，用于检查权限和生成语音。
+     * @param group 目标群组，用于上传和播放语音。
+     * @param voiceRole 用户的语音角色，决定语音的生成方式。
+     * @param content 说话的内容，将被转换为语音。
+     */
     @Override
     public void say(long id, Group group, VoiceRole voiceRole, String content) {
+        // 如果用户没有指定语音角色，则使用默认方式处理
         if (voiceRole == null) {
             say(id, group, content);
         }
 
+        // 检查用户是否有权限在群组中播放语音
         if (Permission.checkPermission(id, group.getId())) {
+            // 根据内容和语音角色生成语音数据
             byte[] voiceByte = getVoiceByte(content, voiceRole);
+            // 将语音数据上传到群组的离线语音资源
             OfflineAudio offlineAudio = group.uploadAudio(ExternalResource.create(voiceByte));
+            // 在群组中发送并播放上传的语音
             sendVoice(group, offlineAudio);
         }
     }
@@ -76,19 +94,14 @@ public class VoiceServiceImpl implements VoiceService {
     /**
      * 在指定的群组中发送离线音频消息。
      * <p>
-     * 本函数通过构建一个消息链，将离线音频消息添加到链中，然后通过群组发送此消息链。
-     * 这种方式适用于在机器人或其他需要批量发送音频消息的场景中。
-     *
+     * 此方法用于当需要向一个群组发送音频消息，但发送方当前处于离线状态时。
+     * 它通过调用群组的sendMessage方法，将离线音频消息发送到指定的群组中。
+     * </p>
      * @param group 目标群组，音频消息将发送到这个群组中。
-     * @param offlineAudio 离线音频消息对象，包含音频的具体信息。
+     * @param offlineAudio 离线音频消息对象，包含音频文件的相关信息和数据。
      */
     private void sendVoice(Group group, OfflineAudio offlineAudio) {
-        // 创建一个消息链构建器。
-        MessageChainBuilder messageChainBuilder = new MessageChainBuilder();
-        // 将离线音频消息添加到消息链中。
-        messageChainBuilder.append(offlineAudio);
-        // 发送构建好的消息链到指定的群组中。
-        group.sendMessage(messageChainBuilder.asMessageChain());
+        group.sendMessage(offlineAudio);
     }
 
 
