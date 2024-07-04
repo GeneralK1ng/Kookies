@@ -13,7 +13,7 @@ public class WordCloudConstant implements Serializable {
     public static final int PADDING = 2;
     public static final int BACKGROUND_RADIUS = 300;
     public static final int FONT_SCALAR_MIN = 15;
-    public static final int FONT_SCALAR_MAX = 120;
+    public static final int FONT_SCALAR_MAX = 48;
     public static final Color BACKGROUND_COLOR = new Color(0xEEEEEE);
 
     // TODO 需要一个颜色生成类生成随机组的颜色

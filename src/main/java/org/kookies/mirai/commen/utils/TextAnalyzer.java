@@ -5,6 +5,7 @@ import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -127,15 +128,11 @@ public class TextAnalyzer {
      */
     private static Map<String, String> segmentSentence(String sentence) {
         Result parsed = ToAnalysis.parse(sentence);
-
-        // 使用Java 8的流式处理，将分词结果转换为Map，键为词汇，值为词性标注
-        return parsed.getTerms().stream()
-                .collect(Collectors.toMap(
-                        // 获取分词的名称作为Map的键
-                        Term::getName,
-                        // 获取分词的词性标注作为Map的值
-                        Term::getNatureStr
-                ));
+        Map<String, String> words = new HashMap<>();
+        for (Term term : parsed) {
+            words.put(term.getName(), term.getNatureStr());
+        }
+        return words;
     }
 
 }

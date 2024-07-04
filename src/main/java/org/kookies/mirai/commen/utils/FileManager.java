@@ -9,6 +9,7 @@ import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -124,12 +125,15 @@ public class FileManager {
      * @throws IOException 如果文件写入过程中发生错误。
      */
     public static void writeWordMap2Txt(String filePath, Map<String, Integer> map) throws IOException {
-        // 使用BufferedWriter来优化文件写入操作，通过 FileWriter 将数据写入到指定文件。
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        // 使用BufferedWriter来优化文件写入操作，通过 OutputStreamWriter 和 FileOutputStream 指定 UTF-8 编码
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(Files.newOutputStream(Paths.get(filePath)), StandardCharsets.UTF_8))) {
             // 遍历map的每个键值对，并将它们写入文件中。
             for (Map.Entry<String, Integer> entry : map.entrySet()) {
                 // 写入键值对，以冒号分隔键和值，每对键值对占一行。
-                writer.write(entry.getValue() + ":" + entry.getKey() + "\n");
+                if (!(entry.getKey().isEmpty() || entry.getValue() == null)) {
+                    writer.write(entry.getValue() + ":" + entry.getKey() + "\n");
+                }
             }
         }
         // try-with-resources语句确保BufferedWriter在操作完成后被正确关闭。

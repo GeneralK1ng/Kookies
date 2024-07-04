@@ -6,6 +6,8 @@ import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
 import com.kennycason.kumo.WordFrequency;
 import com.kennycason.kumo.bg.CircleBackground;
+import com.kennycason.kumo.font.FontWeight;
+import com.kennycason.kumo.font.KumoFont;
 import com.kennycason.kumo.font.scale.SqrtFontScalar;
 import com.kennycason.kumo.nlp.FrequencyFileLoader;
 import com.kennycason.kumo.palette.ColorPalette;
@@ -259,6 +261,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         wordCloud.setPadding(WordCloudConstant.PADDING);
         wordCloud.setColorPalette(new ColorPalette(WordCloudConstant.COLOR_PALETTE));
         wordCloud.setBackground(new CircleBackground(WordCloudConstant.BACKGROUND_RADIUS));
+        wordCloud.setKumoFont(new KumoFont("宋体", FontWeight.PLAIN));
         wordCloud.setFontScalar(new SqrtFontScalar(WordCloudConstant.FONT_SCALAR_MIN, WordCloudConstant.FONT_SCALAR_MAX));
         wordCloud.setBackgroundColor(WordCloudConstant.BACKGROUND_COLOR);
         return wordCloud;

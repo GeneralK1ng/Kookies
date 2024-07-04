@@ -54,10 +54,8 @@ public class CacheManager {
 
             // 初始化群组目录，确保后续缓存更新操作的文件目录正确。
             initDir(group);
-            System.out.println("init dir");
             // 更新个人消息缓存，将消息存储到指定发送者和群组的缓存中。
             updatePersonalMessageCache(sender, group, message);
-            System.out.println("setCache");
         } catch (Exception e) {
             // 如果在缓存操作过程中发生异常，抛出自定义的CacheException异常。
             // 如果初始化过程中发生异常，抛出授权异常
@@ -121,9 +119,9 @@ public class CacheManager {
     public static File getTodayWordCountFile(Long groupId) {
         // 根据配置中启用的群组列表和群组ID，获取群组目录名
         String groupDirName = getGroupDirName(getConfig().getEnableGroupList(), groupId);
+        File groupDir = new File(DataPathInfo.MESSAGE_CACHE_DIR_PATH, groupDirName);
 
-        // 使用当前日期作为文件名后缀，创建当天的单词计数文件对象
-        return new File(groupDirName, LocalDate.now() + ".txt");
+        return new File(groupDir, LocalDate.now()+ ".txt");
     }
 
 
@@ -187,7 +185,6 @@ public class CacheManager {
      * @param message 新的消息内容。
      */
     private static void handlePersonalMsgFileExists(File senderFile, String message) {
-        System.out.println("handlePersonalMsgFileExists");
         // 从文件中加载现有的个人消息列表。
         List<PersonalMessage> personalMsgList = getPersonalMsgList(senderFile);
         // 获取个人消息列表中的最新消息。
@@ -454,12 +451,10 @@ public class CacheManager {
      * @throws DataLoadException 如果文件读取失败，则抛出此异常。
      */
     private static List<PersonalMessage> getPersonalMsgList(File senderFile) {
-        System.out.println("getPersonalMsgList");
         JsonArray jsonArray;
         try {
             // 尝试读取文件中的JSON数组。
             jsonArray = FileManager.readJsonArray(senderFile.getPath());
-            System.out.println(jsonArray);
         } catch (IOException e) {
             // 如果发生IO异常，抛出自定义的数据加载异常。
             throw new DataLoadException(MsgConstant.PERSONAL_MESSAGE_CACHE_LOAD_ERROR);
@@ -467,10 +462,8 @@ public class CacheManager {
 
         // 使用TypeToken来指定GSON解析的类型为List<PersonalMessage>。
         Type listType = new TypeToken<List<PersonalMessage>>() {}.getType();
-        System.out.println(jsonArray);
         // 从JSON数组中解析出个人消息列表。
         List<PersonalMessage> personalMessageList = GSON.fromJson(jsonArray, listType);
-        System.out.println(personalMessageList);
         return personalMessageList;
     }
 
