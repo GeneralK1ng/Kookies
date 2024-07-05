@@ -78,7 +78,7 @@ public final class Kookie extends JavaPlugin {
             Group group = g.getGroup();
 
             String content = "";
-            if (!msg.serializeToMiraiCode().startsWith("[mirai:")) {
+            if (!msg.serializeToMiraiCode().startsWith("[mirai:") && !msg.serializeToMiraiCode().contains("[不支持的消息")) {
                 content = msg.contentToString();
             }
 

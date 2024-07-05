@@ -261,7 +261,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         wordCloud.setPadding(WordCloudConstant.PADDING);
         wordCloud.setColorPalette(new ColorPalette(WordCloudConstant.COLOR_PALETTE));
         wordCloud.setBackground(new CircleBackground(WordCloudConstant.BACKGROUND_RADIUS));
-        wordCloud.setKumoFont(new KumoFont("宋体", FontWeight.PLAIN));
+        wordCloud.setKumoFont(new KumoFont("SimSun", FontWeight.PLAIN));
         wordCloud.setFontScalar(new SqrtFontScalar(WordCloudConstant.FONT_SCALAR_MIN, WordCloudConstant.FONT_SCALAR_MAX));
         wordCloud.setBackgroundColor(WordCloudConstant.BACKGROUND_COLOR);
         return wordCloud;
