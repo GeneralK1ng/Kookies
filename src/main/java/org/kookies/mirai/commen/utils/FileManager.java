@@ -1,6 +1,7 @@
 package org.kookies.mirai.commen.utils;
 
 import com.google.gson.*;
+import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.exceptions.CacheException;
@@ -12,13 +13,16 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
  * @author General_K1ng
  */
 public class FileManager {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
 
     /**
      * 从指定路径读取模板文件的内容。

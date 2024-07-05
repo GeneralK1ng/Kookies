@@ -60,6 +60,8 @@ public final class Kookie extends JavaPlugin {
         try {
             ConfigurationLoader.init();
             JobScheduler.start();
+            System.setProperty("java.awt.headless", "true");
+            System.setProperty("file.encoding", "UTF-8");
         } catch (SchedulerJobException e) {
             getLogger().error(MsgConstant.SCHEDULER_EXCEPTION, e);
         } catch (Exception e) {
