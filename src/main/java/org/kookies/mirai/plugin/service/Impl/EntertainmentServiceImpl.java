@@ -30,6 +30,7 @@ import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.ApiRequester;
 import org.kookies.mirai.commen.utils.CacheManager;
+import org.kookies.mirai.commen.utils.ColorManager;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.EntertainmentService;
@@ -258,12 +259,16 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         Dimension dimension = new Dimension(WordCloudConstant.IMAGE_WIDTH, WordCloudConstant.IMAGE_HEIGHT);
         WordCloud wordCloud = new WordCloud(dimension, CollisionMode.PIXEL_PERFECT);
 
+        ColorManager colorManager = new ColorManager();
+        Color bkgColor = colorManager.generateBkgColor();
+        Color[] colorPalette = colorManager.generateTextColor(bkgColor);
+
         wordCloud.setPadding(WordCloudConstant.PADDING);
-        wordCloud.setColorPalette(new ColorPalette(WordCloudConstant.COLOR_PALETTE));
+        wordCloud.setColorPalette(new ColorPalette(colorPalette));
         wordCloud.setBackground(new CircleBackground(WordCloudConstant.BACKGROUND_RADIUS));
-        wordCloud.setKumoFont(new KumoFont("SimSun", FontWeight.PLAIN));
+        wordCloud.setKumoFont(new KumoFont("宋体", FontWeight.PLAIN));
         wordCloud.setFontScalar(new SqrtFontScalar(WordCloudConstant.FONT_SCALAR_MIN, WordCloudConstant.FONT_SCALAR_MAX));
-        wordCloud.setBackgroundColor(WordCloudConstant.BACKGROUND_COLOR);
+        wordCloud.setBackgroundColor(bkgColor);
         return wordCloud;
     }
 
