@@ -11,6 +11,6 @@ public class WordCloudConstant implements Serializable {
     public static final int IMAGE_HEIGHT = 1200;
     public static final int PADDING = 2;
     public static final int BACKGROUND_RADIUS = 600;
-    public static final int FONT_SCALAR_MIN = 36;
-    public static final int FONT_SCALAR_MAX = 128;
+    public static final int FONT_SCALAR_MIN = 32;
+    public static final int FONT_SCALAR_MAX = 256;
 }
