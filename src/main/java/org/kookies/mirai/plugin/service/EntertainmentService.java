@@ -30,4 +30,5 @@ public interface EntertainmentService {
      * @param group 群
      */
     void todayWord(Long sender, Group group);
+
 }

@@ -9,15 +9,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.GaodeAPIConstant;
 import org.kookies.mirai.commen.constant.MsgConstant;
+import org.kookies.mirai.commen.constant.WordCloudConstant;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
 import org.kookies.mirai.pojo.dto.PoiDTO;
 
 
+import java.awt.*;
+import java.awt.Font;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +38,8 @@ public class ConfigurationLoader {
     private static final File CONFIG = new File(DataPathInfo.CONFIG_PATH);
 
     private static final File EAT_POI = new File(DataPathInfo.EAT_WHAT_POI_PATH);
+
+    private static final File FONTS_DIR = new File(DataPathInfo.FONTS_PATH);
 
     private static final DataFormatter DATA_FORMATTER = new DataFormatter();
 
@@ -53,8 +59,8 @@ public class ConfigurationLoader {
                 update();
             }
 
-            initEatPOI();
-
+            initEatPoi();
+            installFonts();
             // 读取配置文件并解析为 Config 对象
 //            JsonObject jsonObject = FileManager.readJsonFile(CONFIG.getPath());
 //            Config CONFIG = GSON.fromJson(jsonObject, Config.class);
@@ -83,7 +89,7 @@ public class ConfigurationLoader {
      * 如果文件存在，则直接读取并覆盖该文件内容。
      * 该过程如果出现IO异常，则抛出配置加载异常。
      */
-    private static void initEatPOI() {
+    private static void initEatPoi() {
         try {
             // 检查吃喝点位信息文件是否存在，不存在则创建其父目录并初始化文件
             if (!EAT_POI.exists()) {
@@ -202,5 +208,55 @@ public class ConfigurationLoader {
                 return "N/A";
         }
     }
+
+    /**
+     * 安装所需的字体。
+     * <p>
+     * 检查当前系统中是否缺少指定的字体，如果缺少，则从指定目录复制这些字体文件到系统字体目录。
+     * 这个方法主要用于确保系统中具有用于生成词云图所需的全部字体。
+     */
+    private static void installFonts() {
+        // 获取本地图形环境，用于检查系统中已安装的字体
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // 获取系统中所有可用的字体名称
+        String[] fontNames = ge.getAvailableFontFamilyNames();
+        // 定义需要检查的字体列表
+        String[] needFonts = WordCloudConstant.FONTS;
+
+        // 遍历需要检查的字体列表
+        for (String needFont : needFonts) {
+            // 检查系统中是否已存在指定的字体
+            if (!Arrays.asList(fontNames).contains(needFont)) {
+                try {
+                    // 获取字体文件所在的目录
+                    File[] fontFiles = FONTS_DIR.listFiles();
+                    // 定义目标字体安装目录
+                    File dir = new File(DataPathInfo.SYSTEM_FONT_PATH);
+
+                    // 检查目标目录是否存在，如果不存在则尝试创建
+                    if (!dir.exists()) {
+                        boolean created = dir.mkdirs();
+                        // 如果目录创建失败，则抛出异常
+                        if (!created) {
+                            throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
+                        }
+                    }
+
+                    // 遍历字体文件，寻找与需要安装的字体匹配的文件
+                    for (File fontFile : Objects.requireNonNull(fontFiles)) {
+                        // 如果文件名包含需要安装的字体名称，则复制该文件到目标目录
+                        if (fontFile.getName().contains(needFont)) {
+                            FileManager.copyFile2Directory(fontFile, dir);
+                        }
+                    }
+
+                } catch (IOException e) {
+                    // 如果在处理字体文件过程中发生IO异常，则抛出数据加载异常
+                    throw new DataLoadException(MsgConstant.FONT_INSTALL_ERROR);
+                }
+            }
+        }
+    }
+
 
 }

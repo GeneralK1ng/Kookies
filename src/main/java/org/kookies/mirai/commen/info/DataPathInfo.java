@@ -27,4 +27,8 @@ public class DataPathInfo {
     public static final String TODAY_GIRL_FRIEND_PERMISSION_PATH = "./kookies/data/TodayGirl.json";
 
     public static final String WORD_CLOUD_PATH = "./kookies/data/wordCloud";
+
+    public static final String FONTS_PATH = "/fonts";
+
+    public static final String SYSTEM_FONT_PATH = "/usr/share/fonts/kookie";
 }

@@ -57,4 +57,8 @@ public class MsgConstant {
     public static final String WORD_MAP_WRITE_ERROR = "词频统计写入失败";
 
     public static final String WORD_FREQUENCY_LOAD_ERROR = "词云词频文件加载失败";
+
+    public static final String FONT_INSTALL_ERROR = "字体安装失败";
+
+    public static final String FILE_MOVE_ERROR = "文件移动失败";
 }

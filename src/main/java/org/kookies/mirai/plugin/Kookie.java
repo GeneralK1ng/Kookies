@@ -78,7 +78,7 @@ public final class Kookie extends JavaPlugin {
             Group group = g.getGroup();
 
             String content = "";
-            if (!msg.serializeToMiraiCode().startsWith("[mirai:")) {
+            if (!msg.serializeToMiraiCode().startsWith("[mirai:") && !msg.serializeToMiraiCode().contains("[不支持的消息")) {
                 content = msg.contentToString();
             }
 
@@ -154,6 +154,9 @@ public final class Kookie extends JavaPlugin {
                 case FunctionInfo.TODAY_WORD:
                     getLogger().info("今日词云, 调用者：" + userName);
                     entertainmentService.todayWord(sender.getId(), group);
+                    break;
+
+                case FunctionInfo.WEEK_WORD:
                     break;
 
             }
