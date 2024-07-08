@@ -43,12 +43,14 @@ public class Permission {
 
         // 检查用户是否在黑名单中
         if (config.getUserBlackList().contains(sender)) {
-            throw new AuthException(MsgConstant.USER_IN_BLACK_LIST);
+            return false;
+            //throw new AuthException(MsgConstant.USER_IN_BLACK_LIST);
         }
 
         // 检查群组是否被启用
         if (!checkGroup(config, group)) {
-            throw new AuthException(MsgConstant.GROUP_NOT_ENABLE);
+            return false;
+            //throw new AuthException(MsgConstant.GROUP_NOT_ENABLE);
         }
 
         return true;
