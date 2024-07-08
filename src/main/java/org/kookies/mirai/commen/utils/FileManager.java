@@ -5,6 +5,7 @@ import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.exceptions.CacheException;
+import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
@@ -250,5 +251,23 @@ public class FileManager {
         return config;
     }
 
+
+    /**
+     * 将文件复制到指定目录下。
+     * <p>
+     * 通过重命名文件的方式来实现文件的复制，即将源文件移动到目标目录下。
+     * 如果移动失败，则抛出数据加载异常，表示文件拷贝出错。
+     *
+     * @param fontFile 需要复制的文件，即源文件。
+     * @param dir 目标目录，文件将被复制到这个目录下。
+     * @throws IOException 如果文件移动操作失败，则抛出此异常。
+     * @throws DataLoadException 如果文件无法移动到目标目录，则抛出此异常，表示字体安装出错。
+     */
+    public static void copyFile2Directory(File fontFile, File dir) throws IOException {
+        boolean result = fontFile.renameTo(new File(dir, fontFile.getName()));
+        if (!result) {
+            throw new DataLoadException(MsgConstant.FILE_MOVE_ERROR);
+        }
+    }
 
 }

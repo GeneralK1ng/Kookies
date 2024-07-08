@@ -17,7 +17,7 @@ public class WordCloudConstant implements Serializable {
 
     public static Random RANDOM = new Random();
 
-    private static final String[] FONTS = new String[] {
+    public static final String[] FONTS = new String[] {
             "楷体",
             "宋体",
             "华文楷体",
