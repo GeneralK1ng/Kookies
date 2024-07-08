@@ -1,6 +1,7 @@
 package org.kookies.mirai.commen.constant;
 
 import java.io.Serializable;
+import java.util.Random;
 
 
 /**
@@ -13,4 +14,18 @@ public class WordCloudConstant implements Serializable {
     public static final int BACKGROUND_RADIUS = 600;
     public static final int FONT_SCALAR_MIN = 32;
     public static final int FONT_SCALAR_MAX = 256;
+
+    public static Random RANDOM = new Random();
+
+    private static final String[] FONTS = new String[] {
+            "楷体",
+            "宋体",
+            "华文楷体",
+            "得意黑"
+    };
+
+    public static String randomFont() {
+        int randomIndex = RANDOM.nextInt(FONTS.length);
+        return FONTS[randomIndex];
+    }
 }

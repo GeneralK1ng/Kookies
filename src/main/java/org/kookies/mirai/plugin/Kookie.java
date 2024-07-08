@@ -156,6 +156,9 @@ public final class Kookie extends JavaPlugin {
                     entertainmentService.todayWord(sender.getId(), group);
                     break;
 
+                case FunctionInfo.WEEK_WORD:
+                    break;
+
             }
         });
 
