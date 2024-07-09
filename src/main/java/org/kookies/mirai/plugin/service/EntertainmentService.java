@@ -31,4 +31,11 @@ public interface EntertainmentService {
      */
     void todayWord(Long sender, Group group);
 
+    /**
+     * 暗黑笑话
+     *
+     * @param id 发送者
+     * @param group 群
+     */
+    void darkJoke(long id, Group group);
 }

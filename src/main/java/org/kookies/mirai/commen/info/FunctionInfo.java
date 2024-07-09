@@ -23,4 +23,6 @@ public class FunctionInfo {
 
     public static final String WEEK_WORD = "本周词云";
 
+    public static final String DARK_JOKE = "地狱笑话";
+
 }

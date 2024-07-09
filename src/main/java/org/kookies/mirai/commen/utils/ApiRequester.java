@@ -287,4 +287,25 @@ public class ApiRequester {
         return new JSONObject(response.body().string()).getString("access_token");
     }
 
+    /**
+     * 发起GET请求以获取一个暗黑笑话。
+     * <p>
+     * 这个方法通过调用HTTP客户端，向指定的API端点发送一个GET请求，以获取一个暗黑笑话。
+     * 请求的URL由固定的API端点和一个类别参数组成，类别参数用于指定笑话的类型。
+     *
+     * @return Response 对象，包含从服务器接收到的响应。
+     * @throws IOException 如果网络通信出现错误。
+     */
+    public static Response getDarkJoke() throws IOException {
+        // 构建请求对象，指定请求的URL和方法类型
+        Request request = new Request.Builder()
+                .url(JokeApiConstant.DARK_JOKE_URL +
+                        "/" + JokeApiConstant.CATEGORY)
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+
+        // 执行请求并返回响应
+        return HTTP_CLIENT.newCall(request).execute();
+    }
+
 }
