@@ -156,7 +156,9 @@ public final class Kookie extends JavaPlugin {
                     entertainmentService.todayWord(sender.getId(), group);
                     break;
 
-                case FunctionInfo.WEEK_WORD:
+                case FunctionInfo.DARK_JOKE:
+                    getLogger().info("地狱笑话, 调用者：" + userName);
+                    entertainmentService.darkJoke(sender.getId(), group);
                     break;
 
             }

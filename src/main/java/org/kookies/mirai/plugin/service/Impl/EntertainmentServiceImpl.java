@@ -2,6 +2,7 @@ package org.kookies.mirai.plugin.service.Impl;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.kennycason.kumo.CollisionMode;
 import com.kennycason.kumo.WordCloud;
 import com.kennycason.kumo.WordFrequency;
@@ -21,10 +22,12 @@ import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.ExternalResource;
 import okhttp3.Response;
+import org.json.JSONException;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.constant.WordCloudConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
+import org.kookies.mirai.commen.enumeration.JokeType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
@@ -38,6 +41,9 @@ import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
 import org.kookies.mirai.pojo.entity.PersonalMessage;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
+import org.kookies.mirai.pojo.entity.api.response.joke.JokeResponse;
+import org.kookies.mirai.pojo.entity.api.response.joke.SingleResponse;
+import org.kookies.mirai.pojo.entity.api.response.joke.TwoPartResponse;
 
 import java.awt.*;
 import java.io.File;
@@ -146,6 +152,123 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         sendMsg(chain, group, image);
 
     }
+
+    /**
+     * 发送地狱笑话到指定群组。
+     * <p>
+     * 此方法重写了父类的darkJoke方法，专门用于向特定群组发送暗黑笑话。
+     * 在发送之前，会检查调用者是否有权限在该群组中发送消息。
+     *
+     * @param id       发送者ID，用于权限检查。
+     * @param group    目标群组对象，用于获取群组ID并进行权限检查。
+     * @throws RequestException 如果请求暗黑笑话时发生IO异常，则抛出此异常。
+     */
+    @Override
+    public void darkJoke(long id, Group group) {
+        assert Permission.checkPermission(id, group.getId());
+        String response;
+        try {
+            response = Objects.requireNonNull(ApiRequester.getDarkJoke().body()).string();
+        } catch (IOException e) {
+            // 如果在请求过程中发生IO异常，抛出自定义的RequestException异常。
+            throw new RequestException(MsgConstant.JOKE_REQUEST_ERROR);
+        }
+
+        // 处理API响应，将其转换为JokeResponse对象。
+        JokeResponse jokeResponse = processResponse(response);
+
+        handleJokeResponse(jokeResponse, group);
+    }
+
+
+    /**
+     * 处理笑话响应。
+     * <p>
+     * 根据笑话响应的类型，分别处理单个笑话响应和两部分笑话响应。
+     *
+     * @param jokeResponse 笑话响应对象，可能是一个单个笑话响应或两部分笑话响应。
+     * @param group 相关的群组信息，用于上下文处理。
+     */
+    private void handleJokeResponse(JokeResponse jokeResponse, Group group) {
+        if (jokeResponse instanceof SingleResponse) {
+            // 如果是单个笑话响应，进行单个笑话的处理
+            SingleResponse singleResponse = (SingleResponse) jokeResponse;
+            handleSingleJoke(group, singleResponse);
+        } else if (jokeResponse instanceof TwoPartResponse) {
+            // 如果是两部分笑话响应，进行两部分笑话的处理
+            TwoPartResponse twoPartResponse = (TwoPartResponse) jokeResponse;
+            handleTwoPartJoke(group, twoPartResponse);
+        }
+    }
+
+
+    /**
+     * 处理单个笑话的响应。
+     * <p>
+     * 此方法用于解析单个笑话的响应对象，并通过消息链构建器将笑话文本组装成消息，
+     * 最后将消息发送到指定的群组中。
+     * </p>
+     * @param group 目标群组对象，用于指定发送消息的群组。
+     * @param jokeResponse 单个笑话的响应对象，包含获取到的笑话内容。
+     */
+    private void handleSingleJoke(Group group, SingleResponse jokeResponse) {
+        MessageChainBuilder chain = new MessageChainBuilder();
+        chain.append(new PlainText(jokeResponse.getJoke()));
+        group.sendMessage(chain.build());
+    }
+
+    /**
+     * 处理两部分笑话。
+     * <p>
+     * 这个方法用于组装并发送一个包含两部分的笑话：设置部分和交付部分。
+     * 使用MessageChainBuilder来构建消息链，以便在群组中以分段形式发送笑话。
+     *
+     * @param group        笑话将被发送到的群组。
+     * @param twoPartResponse 包含笑话设置和交付的两部分响应对象。
+     */
+    private void handleTwoPartJoke(Group group, TwoPartResponse twoPartResponse) {
+        MessageChainBuilder chain = new MessageChainBuilder();
+        chain.append(new PlainText(twoPartResponse.getSetup() + "\n"));
+        chain.append(new PlainText(twoPartResponse.getDelivery()));
+        group.sendMessage(chain.build());
+    }
+
+
+    /**
+     * 根据响应内容处理笑话响应。
+     *
+     * @param response 从服务器接收到的笑话响应字符串。
+     * @return 解析后的笑话响应对象，可能是单个笑话响应或两部分笑话响应。
+     * @throws IllegalArgumentException 如果响应中的笑话类型无效。
+     * @throws RequestException 如果响应解析过程中发生JSON解析错误。
+     */
+    private JokeResponse processResponse(String response) {
+        try {
+            // 使用GSON从字符串解析出JsonObject。
+            JsonObject jsonObject = GSON.fromJson(response, JsonObject.class);
+            // 提取JsonObject中的"type"字段，用于判断笑话类型。
+            String type = jsonObject.get("type").getAsString();
+            // 根据"type"字段值，转换为对应的笑话类型枚举。
+            JokeType jokeType = JokeType.fromType(type);
+
+            // 根据笑话类型，解析相应的笑话响应对象。
+            switch (jokeType) {
+                case SINGLE:
+                    // 如果是单个笑话，解析为SingleResponse对象。
+                    return GSON.fromJson(response, SingleResponse.class);
+                case TWO_PART:
+                    // 如果是两部分笑话，解析为TwoPartResponse对象。
+                    return GSON.fromJson(response, TwoPartResponse.class);
+                default:
+                    // 如果类型无效，抛出异常。
+                    throw new IllegalArgumentException("Invalid joke type: " + type);
+            }
+        } catch (JSONException e) {
+            // 如果解析过程中发生JSON异常，抛出请求异常。
+            throw new RequestException(MsgConstant.JOKE_PARSE_ERROR);
+        }
+    }
+
 
     /**
      * 发送消息到群组中。

@@ -61,4 +61,8 @@ public class MsgConstant {
     public static final String FONT_INSTALL_ERROR = "字体安装失败";
 
     public static final String FILE_MOVE_ERROR = "文件移动失败";
+
+    public static final String JOKE_REQUEST_ERROR = "笑话请求错误";
+
+    public static final String JOKE_PARSE_ERROR = "笑话解析错误";
 }
