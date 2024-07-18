@@ -230,27 +230,14 @@ public class ConfigurationLoader {
                 try {
                     // 获取字体文件所在的目录
                     File[] fontFiles = FONTS_DIR.listFiles();
-                    // 定义目标字体安装目录
-                    File dir = new File(DataPathInfo.SYSTEM_FONT_PATH);
 
-                    // 检查目标目录是否存在，如果不存在则尝试创建
-                    if (!dir.exists()) {
-                        boolean created = dir.mkdirs();
-                        // 如果目录创建失败，则抛出异常
-                        if (!created) {
-                            throw new DataLoadException(MsgConstant.MAKE_DIR_ERROR);
-                        }
-                    }
-
-                    // 遍历字体文件，寻找与需要安装的字体匹配的文件
                     for (File fontFile : Objects.requireNonNull(fontFiles)) {
-                        // 如果文件名包含需要安装的字体名称，则复制该文件到目标目录
+                        // 如果文件名包含需要安装的字体名称，则注册字体
                         if (fontFile.getName().contains(needFont)) {
-                            FileManager.copyFile2Directory(fontFile, dir);
+                            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fontFile));
                         }
                     }
-
-                } catch (IOException e) {
+                } catch (IOException | FontFormatException e) {
                     // 如果在处理字体文件过程中发生IO异常，则抛出数据加载异常
                     throw new DataLoadException(MsgConstant.FONT_INSTALL_ERROR);
                 }
