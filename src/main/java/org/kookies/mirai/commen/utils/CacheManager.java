@@ -52,6 +52,10 @@ public class CacheManager {
                 return;
             }
 
+            if (message.trim().startsWith("[不支持的消息")) {
+                return;
+            }
+
             // 初始化群组目录，确保后续缓存更新操作的文件目录正确。
             initDir(group);
             // 更新个人消息缓存，将消息存储到指定发送者和群组的缓存中。

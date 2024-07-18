@@ -3,11 +3,12 @@ package org.kookies.mirai.pojo.entity.api.request.baidu.ai;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Builder
-public class ChatRequestBody {
+public class ChatRequestBody implements Serializable {
 
     /*  聊天上下文信息。说明：
         （1）messages成员不能为空，1个成员表示单轮对话，多个成员表示多轮对话
