@@ -154,6 +154,38 @@ public class EntertainmentServiceImpl implements EntertainmentService {
     }
 
     /**
+     * 给定群组中发送昨天的词云图。
+     * 此方法首先验证用户是否有权限查看该群组的数据，然后生成昨天的词云图像并将其发送到指定的群组中。
+     *
+     * @param id 用户ID，用于权限检查。
+     * @param group 目标群组对象，用于获取群组ID和上传图片。
+     */
+    @Override
+    public void yesterdayWord(long id, Group group) {
+        // 断言用户是否有权限查看该群组的数据
+        assert Permission.checkPermission(id, group.getId());
+
+        // 初始化消息构建器
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+        // 从缓存管理器中获取昨天的词云数据文件
+        File yesterdayWordCount = CacheManager.getYesterdayWordCountFile(group.getId());
+
+        // 根据昨天的词云数据文件生成词云图像文件
+        File wordCloudImg = generateWordCloudImgFile(yesterdayWordCount);
+
+        // 从词云图像文件中获取图像数据
+        byte[] imgData = getWordCloudImg(wordCloudImg);
+
+        // 将图像数据转换为群组可上传的Image对象
+        Image image = group.uploadImage(ExternalResource.create(Objects.requireNonNull(imgData)));
+
+        // 使用消息构建器发送包含词云图像的消息到群组
+        sendMsg(chain, group, image);
+    }
+
+
+    /**
      * 发送地狱笑话到指定群组。
      * <p>
      * 此方法重写了父类的darkJoke方法，专门用于向特定群组发送暗黑笑话。

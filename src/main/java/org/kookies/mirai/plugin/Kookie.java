@@ -155,7 +155,12 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("今日词云, 调用者：" + userName);
                     entertainmentService.todayWord(sender.getId(), group);
                     break;
-
+                // 昨日词云
+                case FunctionInfo.YESTERDAY_WORD:
+                    getLogger().info("昨日词云, 调用者：" + userName);
+                    entertainmentService.yesterdayWord(sender.getId(), group);
+                    break;
+                // 地狱笑话
                 case FunctionInfo.DARK_JOKE:
                     getLogger().info("地狱笑话, 调用者：" + userName);
                     entertainmentService.darkJoke(sender.getId(), group);

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.generalk1ng.kookie"
-version = "0.1.7"
+version = "0.1.8"
 
 repositories {
     if (System.getenv("CI")?.toBoolean() != true) {
@@ -43,4 +43,8 @@ dependencies {
     implementation("org.quartz-scheduler:quartz:2.3.2")
 
     implementation("org.apache.commons:commons-lang3:3.14.0")
+
+//    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+//    implementation("org.jsoup:jsoup:1.18.1")
+//    implementation("org.seleniumhq.selenium:selenium-java:4.22.0")
 }

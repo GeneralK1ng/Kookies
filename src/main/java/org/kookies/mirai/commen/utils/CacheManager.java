@@ -128,6 +128,23 @@ public class CacheManager {
         return new File(groupDir, LocalDate.now()+ ".txt");
     }
 
+    /**
+     * 获取昨天的单词计数文件。
+     *
+     * 此方法用于根据群组ID生成并返回一个文件对象，该对象代表了昨天的单词计数文件。
+     * 文件名格式为日期.txt，日期为昨天的日期。文件存储在特定群组的目录中。
+     *
+     * @param groupId 群组ID，用于确定文件存储的特定群组目录。
+     * @return 昨天的单词计数文件的File对象。
+     */
+    public static File getYesterdayWordCountFile(Long groupId) {
+        // 根据群组ID和启用的群组列表生成群组目录名
+        String groupDirName = getGroupDirName(getConfig().getEnableGroupList(), groupId);
+        // 创建群组目录的File对象
+        File groupDir = new File(DataPathInfo.MESSAGE_CACHE_DIR_PATH, groupDirName);
+        // 返回昨天的单词计数文件的File对象
+        return new File(groupDir, LocalDate.now().minusDays(1) + ".txt");
+    }
 
     /**
      * 更新个人消息缓存。

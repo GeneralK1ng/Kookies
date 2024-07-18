@@ -38,4 +38,12 @@ public interface EntertainmentService {
      * @param group 群
      */
     void darkJoke(long id, Group group);
+
+    /**
+     * 本周词云
+     *
+     * @param id 发送者
+     * @param group 群
+     */
+    void yesterdayWord(long id, Group group);
 }
