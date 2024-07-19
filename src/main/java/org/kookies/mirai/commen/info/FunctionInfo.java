@@ -27,4 +27,6 @@ public class FunctionInfo {
 
     public static final String DARK_JOKE = "地狱笑话";
 
+    public static final String BEAUTIFUL_GIRL = "先打胶吧";
+
 }

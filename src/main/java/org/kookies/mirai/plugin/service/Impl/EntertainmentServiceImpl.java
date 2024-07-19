@@ -16,10 +16,8 @@ import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.message.code.MiraiCode;
+import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.message.data.Image;
-import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.MessageChainBuilder;
-import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.ExternalResource;
 import okhttp3.Response;
 import org.json.JSONException;
@@ -31,10 +29,8 @@ import org.kookies.mirai.commen.enumeration.JokeType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
-import org.kookies.mirai.commen.utils.ApiRequester;
-import org.kookies.mirai.commen.utils.CacheManager;
-import org.kookies.mirai.commen.utils.ColorManager;
-import org.kookies.mirai.commen.utils.FileManager;
+import org.kookies.mirai.commen.utils.*;
+import org.kookies.mirai.plugin.auth.DuplicatePermission;
 import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.EntertainmentService;
 import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
@@ -49,10 +45,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,6 +178,45 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         sendMsg(chain, group, image);
     }
 
+    /**
+     * 向指定群组发送一个美丽的女孩的短视频。
+     * <p>
+     * 此方法首先验证发送者的权限，确保他们有权限发送视频，并且没有重复发送相同的视频。
+     * 然后，方法会保存视频文件、提取视频及缩略图，并将它们上传到群组中。
+     * 最后，方法会通知群组成员，视频已经成功上传。
+     *
+     * @param id 发送者的身份标识。
+     * @param group 目标群组。
+     */
+    @Override
+    public void beautifulGirl(long id, Group group) {
+        // 验证发送者是否有权限向该群组发送视频
+        assert Permission.checkPermission(id, group.getId());
+        // 验证是否已经发送过同样的美丽女孩视频
+        if (DuplicatePermission.checkBeautifulGirlPermission(id)) {
+            // 保存美丽的女孩视频到本地文件
+            File videoFile = saveBGVideo();
+            // 从文件中提取视频内容
+            byte[] video = getBGVideo(videoFile);
+            // 从文件中提取视频缩略图
+            byte[] thumbnail = getBGThumbnail(videoFile);
+
+            // 向群组发送消息，通知成员视频正在获取中
+            group.sendMessage("正在获取，请稍后...");
+
+            // 将视频和缩略图上传到群组，创建一个短视频对象
+            ShortVideo shortVideo = group.uploadShortVideo(
+                    ExternalResource.create(Objects.requireNonNull(thumbnail)),
+                    ExternalResource.create(Objects.requireNonNull(video)),
+                    videoFile.getName());
+
+            // 向群组发送上传成功的短视频
+            group.sendMessage(shortVideo);
+        } else {
+            group.sendMessage(MsgConstant.BEAUTIFUL_GIRL_DUPLICATE_PERMISSION_ERROR);
+        }
+    }
+
 
     /**
      * 发送地狱笑话到指定群组。
@@ -212,6 +245,87 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         handleJokeResponse(jokeResponse, group);
     }
 
+    /**
+     * 获取背景视频数据。
+     * <p>
+     * 通过此方法，从指定的文件路径中读取视频数据，以字节数组的形式返回。
+     * 如果在读取文件过程中发生IO异常，将抛出自定义的数据加载异常。
+     *
+     * @param videoFile 背景视频的文件对象，用于获取视频文件的路径。
+     * @return 返回读取到的背景视频的字节数组。
+     * @throws DataLoadException 如果在读取视频文件时发生IO异常，则抛出此异常。
+     */
+    private byte[] getBGVideo(File videoFile) {
+        try {
+            // 尝试从文件路径中读取字节数据。
+            return FileManager.readByteFile(videoFile.getPath());
+        } catch (IOException e) {
+            // 在发生IO异常时，抛出自定义的数据加载异常。
+            throw new DataLoadException(MsgConstant.BEAUTIFUL_GIRL_VIDEO_GET_ERROR);
+        }
+    }
+
+
+    /**
+     * 下载并保存美女视频。
+     * <p>
+     * 该方法尝试从一个远程API获取一段美女视频，并将其保存到应用的数据目录中。
+     * 如果保存成功，方法将返回保存视频的文件对象；如果保存失败，将抛出一个请求异常。
+     *
+     * @return File 保存视频的文件对象。
+     * @throws RequestException 如果保存视频时发生IO异常。
+     */
+    private File saveBGVideo() {
+        try {
+            // 从API请求美女视频数据
+            byte[] video = ApiRequester.getBeautifulGirlVideo();
+            File videoDir = new File(DataPathInfo.BEAUTIFUL_GIRL_VIDEO_PATH);
+
+            if (!videoDir.exists()) {
+                videoDir.mkdirs();
+            }
+
+            // 生成一个唯一的文件名，以避免文件覆盖
+            File videoFile = new File(videoDir, UUID.randomUUID() + ".mp4");
+
+            // 将视频数据保存到文件系统中
+            FileManager.saveFile(video, videoFile);
+            return videoFile;
+        } catch (IOException e) {
+            // 如果在保存过程中发生IO异常，抛出一个自定义的请求异常
+            throw new RequestException(MsgConstant.BEAUTIFUL_GIRL_VIDEO_SAVE_ERROR);
+        }
+    }
+
+
+    /**
+     * 获取视频的背景缩略图。
+     * <p>
+     * 该方法尝试从指定的视频文件中提取一帧作为背景缩略图。它首先创建一个临时文件来存储提取的帧，
+     * 然后将该帧转换为字节数组以供使用，最后删除临时文件。
+     * 如果在提取帧的过程中发生I/O错误，将抛出一个自定义的异常。
+     *
+     * @param videoFile 视频文件，从中提取背景缩略图。
+     * @return 背景缩略图的字节数组。
+     * @throws DataLoadException 如果提取视频帧时发生I/O错误，则抛出此异常。
+     */
+    private byte[] getBGThumbnail(File videoFile) {
+        try {
+            // 创建一个临时文件来存储视频的背景缩略图。
+            File tempThumbFile = new File(DataPathInfo.CONFIG_DIR_PATH, "tempThumb.jpg");
+            // 调用VideoThumbTaker类的方法提取视频的第一帧并保存到临时文件中。
+            VideoThumbTaker.fetchFrame(videoFile.getPath(), tempThumbFile.getPath());
+            // 读取临时文件中的缩略图数据到字节数组。
+            byte[] imgData = FileManager.readByteFile(tempThumbFile.getPath());
+            // 删除不再需要的临时文件。
+            tempThumbFile.delete();
+            // 返回缩略图的字节数组。
+            return imgData;
+        } catch (IOException e) {
+            // 如果发生I/O错误，抛出自定义的异常。
+            throw new DataLoadException(MsgConstant.VIDEO_THUMB_TAKE_ERROR);
+        }
+    }
 
     /**
      * 处理笑话响应。

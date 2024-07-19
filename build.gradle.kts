@@ -47,4 +47,7 @@ dependencies {
 //    implementation("org.apache.httpcomponents:httpclient:4.5.14")
 //    implementation("org.jsoup:jsoup:1.18.1")
 //    implementation("org.seleniumhq.selenium:selenium-java:4.22.0")
+
+    implementation("org.jcodec:jcodec:0.2.5")
+    implementation("org.jcodec:jcodec-javase:0.2.5")
 }

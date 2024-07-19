@@ -13,6 +13,7 @@ import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
@@ -269,5 +270,43 @@ public class FileManager {
             throw new DataLoadException(MsgConstant.FILE_MOVE_ERROR);
         }
     }
+
+
+
+    /**
+     * 将字节数组写入指定文件。
+     * <p>
+     * 此方法创建一个新的文件并写入给定的字节数组。如果文件路径已存在，则会抛出异常。
+     * 使用 try-with-resources 确保输出流正确关闭，即使发生异常也是如此。
+     *
+     * @param bytes 要写入文件的字节数组。
+     * @param filePath 指定的文件路径，将在此路径下创建新文件。
+     * @throws IOException 如果文件创建或写入过程中发生错误。
+     */
+    public static void saveFile(byte[] bytes, File filePath) throws IOException {
+        // 创建一个新的文件。
+        Path file = Files.createFile(filePath.toPath());
+        // 使用 try-with-resources 确保输出流正确关闭。
+        try (OutputStream os = Files.newOutputStream(file)) {
+            os.write(bytes);
+        }
+    }
+
+
+    /**
+     * 从指定的文件路径读取全部字节内容。
+     * <p>
+     * 此方法提供了一个简单的方法来读取整个文件的内容，将其作为字节数组返回。
+     * 这对于处理小型文件或需要直接访问文件字节内容的场景非常有用。
+     *
+     * @param filePath 文件的路径。此路径应指向一个存在的文件。
+     * @return 文件的全部字节内容。
+     * @throws IOException 如果发生I/O错误，例如文件不存在或没有读取权限时，将抛出此异常。
+     */
+    public static byte[] readByteFile(String filePath) throws IOException {
+        return Files.readAllBytes(Paths.get(filePath));
+    }
+
+
 
 }

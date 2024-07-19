@@ -46,4 +46,12 @@ public interface EntertainmentService {
      * @param group 群
      */
     void yesterdayWord(long id, Group group);
+
+    /**
+     * 美女
+     *
+     * @param id 发送者
+     * @param group 群
+     */
+    void beautifulGirl(long id, Group group);
 }

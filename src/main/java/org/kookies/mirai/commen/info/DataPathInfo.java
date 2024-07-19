@@ -26,6 +26,10 @@ public class DataPathInfo {
 
     public static final String TODAY_GIRL_FRIEND_PERMISSION_PATH = "./kookies/data/TodayGirl.json";
 
+    public static final String BEAUTIFUL_GIRL_PERMISSION_PATH = "./kookies/data/beautifulGirl.json";
+
+    public static final String BEAUTIFUL_GIRL_VIDEO_PATH = "./kookies/data/beautifulGirlVideo";
+
     public static final String WORD_CLOUD_PATH = "./kookies/data/wordCloud";
 
     public static final String FONTS_PATH = "/fonts";

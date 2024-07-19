@@ -65,4 +65,12 @@ public class MsgConstant {
     public static final String JOKE_REQUEST_ERROR = "笑话请求错误";
 
     public static final String JOKE_PARSE_ERROR = "笑话解析错误";
+
+    public static final String BEAUTIFUL_GIRL_DUPLICATE_PERMISSION_ERROR = "打这么多胶怎么没把你打死，傻逼吗？";
+
+    public static final String BEAUTIFUL_GIRL_VIDEO_GET_ERROR = "视频获取失败";
+
+    public static final String BEAUTIFUL_GIRL_VIDEO_SAVE_ERROR = "视频保存失败";
+
+    public static final String VIDEO_THUMB_TAKE_ERROR = "视频缩略图获取失败";
 }

@@ -165,7 +165,10 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("地狱笑话, 调用者：" + userName);
                     entertainmentService.darkJoke(sender.getId(), group);
                     break;
-
+                case FunctionInfo.BEAUTIFUL_GIRL:
+                    getLogger().info("先打胶吧, 调用者：" + userName);
+                    entertainmentService.beautifulGirl(sender.getId(), group);
+                    break;
             }
         });
 

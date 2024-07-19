@@ -81,6 +81,28 @@ public class ApiRequester {
     }
 
     /**
+     * 获取美丽女孩视频的函数。
+     * <p>
+     * 通过发送HTTP GET请求到指定的API endpoint，来获取视频内容。
+     *
+     * @return byte[] - 返回从API获取的视频数据。
+     * @throws IOException 如果网络请求失败或读取响应时发生错误。
+     */
+    public static byte[] getBeautifulGirlVideo() throws IOException {
+        // 构建HTTP GET请求，指定请求的URL和请求类型。
+        Request request = new Request.Builder()
+                .url(LolimiApiConstant.BEAUTIFUL_GIRL_API)
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+
+        // 执行HTTP请求并获取响应。
+        Response response = HTTP_CLIENT.newCall(request).execute();
+        // 从响应中提取并返回视频数据。
+        return response.body().bytes();
+    }
+
+
+    /**
      * 根据文本内容获取对应的语音数据。
      * <p>
      * 本函数通过读取配置文件，构建语音请求对象，并发送HTTP请求到语音API，以获取语音数据。

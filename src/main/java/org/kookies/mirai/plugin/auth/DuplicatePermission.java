@@ -10,6 +10,7 @@ import org.kookies.mirai.commen.exceptions.AuthException;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.FileManager;
+import org.kookies.mirai.pojo.dto.BeautifulGirlPermissionDTO;
 import org.kookies.mirai.pojo.dto.LuckDayPermissionDTO;
 import org.kookies.mirai.pojo.dto.TodayGirlPermissionDTO;
 import org.kookies.mirai.pojo.entity.Config;
@@ -31,6 +32,7 @@ public class DuplicatePermission {
 
     private static final File TODAY_GIRL_FRIEND_FILE = new File(DataPathInfo.TODAY_GIRL_FRIEND_PERMISSION_PATH);
 
+    private static final File BEAUTIFUL_GIRL_FILE = new File(DataPathInfo.BEAUTIFUL_GIRL_PERMISSION_PATH);
     /**
      * 检查发送者的今日运势权限。
      *
@@ -68,6 +70,62 @@ public class DuplicatePermission {
     }
 
     /**
+     * 检查发送者是否具有美丽女孩权限。
+     * <p>
+     * 此方法尝试初始化发送者的美丽女孩权限。如果初始化成功，则表明发送者具有权限；
+     * 如果初始化失败并捕获到异常，则表明存在权限初始化问题，具体可能是权限已存在或其他异常情况。
+     *
+     * @param sender 发送者ID，用于识别请求权限的实体。
+     * @return 如果初始化成功，则返回true，表示发送者具有美丽女孩权限；如果初始化失败，则会抛出异常。
+     * @throws AuthException 如果权限初始化失败，抛出此异常，异常信息指明了权限初始化的错误原因。
+     */
+    public static boolean checkBeautifulGirlPermission(long sender) {
+        try {
+            return initBeautifulGirlPermission(sender);
+        } catch (Exception e) {
+            throw new AuthException(MsgConstant.BEAUTIFUL_GIRL_DUPLICATE_PERMISSION_ERROR);
+        }
+    }
+
+    /**
+     * 初始化漂亮女孩权限列表。
+     * <p>
+     * 如果当天的权限文件不存在，则创建新的权限文件并返回初始化结果。
+     * 如果当天的权限文件已存在，则检查发送者是否已存在于权限列表中。
+     * 如果发送者不存在，则添加到列表中并返回true；否则返回false。
+     *
+     * @param sender 发送者ID，用于请求漂亮女孩权限。
+     * @return 如果成功获取权限或已存在权限，则返回true；否则返回false。
+     * @throws AuthException 如果读写文件发生IO异常，则抛出授权异常。
+     */
+    private static boolean initBeautifulGirlPermission(long sender) {
+        try {
+            if (!BEAUTIFUL_GIRL_FILE.exists()) {
+                BEAUTIFUL_GIRL_FILE.getParentFile().mkdirs();
+                return initBeautifulGirlSenderList(sender);
+            } else {
+                JsonObject jsonObject = FileManager.readJsonFile(BEAUTIFUL_GIRL_FILE.getPath());
+                BeautifulGirlPermissionDTO dto = GSON.fromJson(jsonObject, BeautifulGirlPermissionDTO.class);
+
+                if (dto.getDate().equals(LocalDate.now())) {
+                    if (dto.getSenders().contains(sender)) {
+                        return false;
+                    } else {
+                        dto.getSenders().add(sender);
+                        String json = GSON.toJson(dto);
+                        FileManager.write(BEAUTIFUL_GIRL_FILE.getPath(), json);
+                        return true;
+                    }
+                } else {
+                    return initBeautifulGirlSenderList(sender);
+                }
+            }
+        } catch (IOException e) {
+            throw new AuthException(MsgConstant.BEAUTIFUL_GIRL_DUPLICATE_PERMISSION_ERROR);
+        }
+    }
+
+    /**
      * 初始化当天女朋友权限。
      * 检查当天是否已为发送者初始化权限，如果未初始化，则进行初始化。如果已初始化，检查发送者是否已达到最大权限次数。
      *
@@ -79,7 +137,7 @@ public class DuplicatePermission {
         try {
             if (!TODAY_GIRL_FRIEND_FILE.exists()) {
                 TODAY_GIRL_FRIEND_FILE.getParentFile().mkdirs();
-                return initSenderMap(sender);
+                return initTodayGirlSenderMap(sender);
             } else {
                 JsonObject jsonObject = FileManager.readJsonFile(TODAY_GIRL_FRIEND_FILE.getPath());
                 TodayGirlPermissionDTO dto = GSON.fromJson(jsonObject, TodayGirlPermissionDTO.class);
@@ -102,7 +160,7 @@ public class DuplicatePermission {
                         return true;
                     }
                 } else {
-                    return initSenderMap(sender);
+                    return initTodayGirlSenderMap(sender);
                 }
             }
         } catch (IOException e) {
@@ -119,7 +177,7 @@ public class DuplicatePermission {
      * @return 总是返回true，表示初始化过程完成。
      * @throws IOException 如果在写入文件过程中发生I/O错误。
      */
-    private static boolean initSenderMap(long sender) throws IOException {
+    private static boolean initTodayGirlSenderMap(long sender) throws IOException {
         // 创建一个TreeMap来有序地存储发送者ID和对应的发送次数。
         Map<Long, Integer> senderMap = new TreeMap<>();
         // 将当前发送者添加到映射中，初始发送次数为1。
@@ -139,6 +197,34 @@ public class DuplicatePermission {
         return true;
     }
 
+    /**
+     * 初始化美丽女孩发送者列表。
+     * <p>
+     * 此方法用于将指定的发送者ID添加到美丽女孩的发送者列表中，并将更新后的列表保存到文件中。
+     *
+     * @param sender 发送者的ID，长整型。
+     * @return 总是返回true，表示初始化操作已完成。
+     * @throws IOException 如果在写入文件过程中发生IO异常。
+     */
+    private static boolean initBeautifulGirlSenderList(long sender) throws IOException{
+        // 创建发送者列表，并将指定的发送者ID添加到列表中
+        List<Long> senderList = new ArrayList<>();
+        senderList.add(sender);
+
+        // 构建一个包含当前日期和发送者列表的数据传输对象
+        BeautifulGirlPermissionDTO dto = BeautifulGirlPermissionDTO.builder()
+                .date(LocalDate.now())
+                .senders(senderList)
+                .build();
+
+        // 将数据传输对象转换为JSON字符串
+        String json = GSON.toJson(dto);
+        // 将JSON字符串写入到指定的文件中
+        FileManager.write(BEAUTIFUL_GIRL_FILE.getPath(), json);
+
+        // 返回true，表示初始化操作已完成
+        return true;
+    }
 
     /**
      * 从配置文件路径中读取并解析配置文件，返回Config对象。
