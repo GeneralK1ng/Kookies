@@ -353,7 +353,7 @@ public class ConvenienceServiceImpl implements ConvenienceService {
      * @param size 随机数的范围大小，即随机数生成的上限为 size-1。
      * @return 一个包含 n 个不重复随机数的整型数组。
      */
-    public static int[] generateUniqueRandomNumbers(int n, int size) {
+    private static int[] generateUniqueRandomNumbers(int n, int size) {
         // 使用 HashSet 存储随机数，以保证元素的唯一性
         Set<Integer> numbers = new HashSet<>();
         // 创建 Random 对象用于生成随机数

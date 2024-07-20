@@ -27,6 +27,7 @@ import org.kookies.mirai.commen.constant.WordCloudConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.enumeration.JokeType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
+import org.kookies.mirai.commen.exceptions.DataWriteException;
 import org.kookies.mirai.commen.exceptions.RequestException;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.commen.utils.*;
@@ -326,9 +327,11 @@ public class EntertainmentServiceImpl implements EntertainmentService {
             File videoDir = new File(DataPathInfo.BEAUTIFUL_GIRL_VIDEO_PATH);
 
             if (!videoDir.exists()) {
-                videoDir.mkdirs();
+                boolean isSuccess = videoDir.mkdirs();
+                if (!isSuccess) {
+                    throw new DataLoadException(MsgConstant.BEAUTIFUL_GIRL_VIDEO_SAVE_ERROR);
+                }
             }
-
             // 生成一个唯一的文件名，以避免文件覆盖
             File videoFile = new File(videoDir, UUID.randomUUID() + ".mp4");
 
@@ -362,7 +365,12 @@ public class EntertainmentServiceImpl implements EntertainmentService {
             // 读取临时文件中的缩略图数据到字节数组。
             byte[] imgData = FileManager.readByteFile(tempThumbFile.getPath());
             // 删除不再需要的临时文件。
-            tempThumbFile.delete();
+            if (tempThumbFile.exists()) {
+                boolean delete = tempThumbFile.delete();
+                if (!delete) {
+                    throw new DataWriteException(MsgConstant.TEMP_THUMB_DELETE_ERROR);
+                }
+            }
             // 返回缩略图的字节数组。
             return imgData;
         } catch (IOException e) {
