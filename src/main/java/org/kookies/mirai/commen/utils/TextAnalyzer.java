@@ -147,6 +147,7 @@ public class TextAnalyzer {
         return words.entrySet().stream()
                 .filter(entry -> !"m".equals(entry.getValue()))
                 .filter(entry -> !"r".equals(entry.getValue()))
+                .filter(entry -> !"p".equals(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
