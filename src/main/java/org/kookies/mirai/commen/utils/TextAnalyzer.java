@@ -49,7 +49,7 @@ public class TextAnalyzer {
      */
     public static Map<String, Integer> countWords(String sentence) {
         // 使用分词方法将句子分割成单词
-        Map<String, String> words = filterNumber(segmentSentence(sentence));
+        Map<String, String> words = filter(segmentSentence(sentence));
 
         // 通过流处理方式对单词进行统计
         return words.entrySet().stream()
@@ -143,9 +143,10 @@ public class TextAnalyzer {
      * @param words 输入的Map，其中键为字符串，值也为字符串。
      * @return 返回一个新的Map，其中不包含值为"m"的条目。
      */
-    private static Map<String, String> filterNumber(Map<String, String> words) {
+    private static Map<String, String> filter(Map<String, String> words) {
         return words.entrySet().stream()
                 .filter(entry -> !"m".equals(entry.getValue()))
+                .filter(entry -> !"r".equals(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

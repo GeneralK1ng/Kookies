@@ -179,6 +179,50 @@ public class EntertainmentServiceImpl implements EntertainmentService {
     }
 
     /**
+     * 根据群组ID生成并发送一周热词图。
+     * <p>
+     * 此方法首先验证用户是否有权限操作指定的群组，然后生成一周热词的词云图片，
+     * 并将该图片发送到指定的群组中。
+     *
+     * @param id 用户ID，用于权限验证。
+     * @param group 目标群组对象，用于获取群组ID并发送消息。
+     * @throws DataLoadException 如果删除一周热词计数文件失败，则抛出此异常。
+     */
+    @Override
+    public void weekWord(long id, Group group) {
+        // 断言用户是否有权限操作指定的群组。
+        assert Permission.checkPermission(id, group.getId());
+
+        // 初始化消息构建器。
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+        // 获取一周热词计数文件。
+        File weekWordCount = CacheManager.getWeekWordCountFile(group.getId());
+
+        // 根据热词计数文件生成词云图片文件。
+        File weekWordCloudImg = generateWordCloudImgFile(weekWordCount);
+
+        // 读取词云图片数据。
+        byte[] imgData = getWordCloudImg(weekWordCloudImg);
+
+        // 将图片数据转换为群组可发送的消息对象。
+        Image image = group.uploadImage(ExternalResource.create(Objects.requireNonNull(imgData)));
+
+        // 如果热词计数文件存在，则尝试删除该文件。
+        if (weekWordCount.exists()) {
+            boolean isSuccess = weekWordCount.delete();
+            // 如果删除失败，抛出数据加载异常。
+            if (!isSuccess) {
+                throw new DataLoadException(MsgConstant.CACHE_EXCEPTION);
+            }
+        }
+
+        // 发送包含词云图片的消息到群组。
+        sendMsg(chain, group, image);
+    }
+
+
+    /**
      * 向指定群组发送一个美丽的女孩的短视频。
      * <p>
      * 此方法首先验证发送者的权限，确保他们有权限发送视频，并且没有重复发送相同的视频。

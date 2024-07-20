@@ -73,4 +73,10 @@ public class MsgConstant {
     public static final String BEAUTIFUL_GIRL_VIDEO_SAVE_ERROR = "视频保存失败";
 
     public static final String VIDEO_THUMB_TAKE_ERROR = "视频缩略图获取失败";
+
+    public static final String WEEK_WORD_COUNT_LOAD_ERROR = "本周词频统计加载失败";
+
+    public static final String WEEK_WORD_COUNT_WRITE_ERROR = "本周词频统计写入失败";
+
+    public static final String WEEK_WORD_COUNT_ISNT_HAS_SEVEN_DAYS = "本周词频统计没有七天数据";
 }
