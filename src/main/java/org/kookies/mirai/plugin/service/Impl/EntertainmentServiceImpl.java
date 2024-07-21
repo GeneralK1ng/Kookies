@@ -35,6 +35,7 @@ import org.kookies.mirai.plugin.auth.DuplicatePermission;
 import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.EntertainmentService;
 import org.kookies.mirai.pojo.dto.EvaluateSomebodyDTO;
+import org.kookies.mirai.pojo.dto.WordStatisticsDTO;
 import org.kookies.mirai.pojo.entity.PersonalMessage;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
@@ -110,7 +111,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
                     .historyMsg(getHistoryMessage(member.getId(), group.getId()))
                     .build();
 
-            List<Message> botMsg = createBotMsg(dto);
+            List<Message> botMsg = createEvaluateBotMsg(dto);
 
             ChatResponse response = getResponse(botMsg, sender.getId());
             sendMsg(at, group, chain, response.getResult());
@@ -222,6 +223,38 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         sendMsg(chain, group, image);
     }
 
+    /**
+     * 统计并发送指定群组的单词统计数据。
+     * <p>
+     * 此方法用于接收群组ID和群组对象，通过调用一系列方法来统计该群组一周内单词的使用次数，
+     * 并将统计结果以消息的形式发送回群组。
+     *
+     * @param id 用户ID，用于权限检查和消息发送。
+     * @param group 群组对象，用于获取群组ID和发送消息。
+     */
+    @Override
+    public void wordStatistics(long id, Group group) {
+        // 断言用户是否有权限查看该群组的统计数据
+        assert Permission.checkPermission(id, group.getId());
+
+        // 初始化消息链构建器，用于组装最终发送的消息
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+        // 从缓存中获取群组一周内的单词使用次数统计
+        Map<String, Integer> weekCnt = CacheManager.getWeekCount(group.getId());
+
+        // 根据单词使用次数统计生成DTO对象，用于数据传输和消息创建
+        WordStatisticsDTO dto = generateWordStatistics(weekCnt);
+
+        // 根据DTO创建机器人发送的消息列表
+        List<Message> botMsg = createWordStatBotMsg(dto);
+
+        // 根据消息列表生成聊天响应，用于实际的消息发送
+        ChatResponse response = getResponse(botMsg, id);
+
+        // 发送统计结果到指定群组
+        sendMsg(dto, group, chain, response.getResult());
+    }
 
     /**
      * 向指定群组发送一个美丽的女孩的短视频。
@@ -289,6 +322,37 @@ public class EntertainmentServiceImpl implements EntertainmentService {
 
         handleJokeResponse(jokeResponse, group);
     }
+
+    /**
+     * 根据一周内单词出现的次数生成单词统计信息。
+     * <p>
+     * 此方法接收一个映射，其中包含单词和它们在一周期间的出现次数，然后生成一个WordStatisticsDTO对象，
+     * 该对象包含了出现次数最多的前十个单词及其对应的出现次数。
+     *
+     * @param weekCnt 一周内单词出现次数的映射，键为单词，值为出现次数。
+     * @return WordStatisticsDTO 对象，包含了出现次数最多的前十个单词及其对应的出现次数。
+     */
+    private WordStatisticsDTO generateWordStatistics(Map<String, Integer> weekCnt) {
+        // 初始化列表以存储出现次数最多的前十个单词和它们的出现次数
+        List<String> top10Words = new ArrayList<>();
+        List<Integer> top10Cnt = new ArrayList<>();
+
+        // 找到次数最多的前十个词，存入对应的链表
+        weekCnt.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(10)
+                .forEach(entry -> {
+                    top10Words.add(entry.getKey());
+                    top10Cnt.add(entry.getValue());
+                });
+
+        // 使用Builder模式构建WordStatisticsDTO对象，包含出现次数最多的前十个单词和它们的出现次数
+        return WordStatisticsDTO.builder()
+                .top10Words(top10Words)
+                .top10Cnt(top10Cnt)
+                .build();
+    }
+
 
     /**
      * 获取背景视频数据。
@@ -506,6 +570,37 @@ public class EntertainmentServiceImpl implements EntertainmentService {
     }
 
     /**
+     * 发送本周本群热词排行榜消息。
+     * <p>
+     * 通过解析WordStatisticsDTO对象中的热词和次数数据，构建并发送包含热词排行榜信息的消息。
+     * 使用MessageChainBuilder逐步构建消息内容，首先添加排行榜标题，然后遍历前10个热词及其次数，最后添加额外的结果信息。
+     * 此方法专用于向指定群组发送热词排行榜消息，是群组管理功能的一部分。
+     *
+     * @param dto WordStatisticsDTO对象，包含热词和对应次数的数据。
+     * @param group 目标群组，用于指定消息的发送对象。
+     * @param chain MessageChainBuilder实例，用于构建消息内容。
+     * @param result 额外的结果信息，将被追加到消息末尾。
+     */
+    private void sendMsg(WordStatisticsDTO dto, Group group, MessageChainBuilder chain, String result) {
+        // 添加排行榜标题
+        chain.append(new PlainText("本周本群热词排行榜为：\n"));
+
+        // 遍历前10个热词及其次数，构建并添加到消息链
+        for (int i = 0; i < 10; i++) {
+            chain.append(new PlainText(String.format("%d. %s 次数：%d \n",
+                    i + 1, dto.getTop10Words().get(i), dto.getTop10Cnt().get(i))));
+        }
+
+        // 添加额外的结果信息
+        chain.append(new PlainText(result));
+
+        // 发送构建完成的消息
+        group.sendMessage(chain.build());
+    }
+
+
+
+    /**
      * 获取词云图像的字节数据
      * <p>
      * 此方法尝试从指定的文件路径中读取词云图像文件，将其以字节数据的形式返回，
@@ -614,9 +709,41 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         }
     }
 
+    /**
+     * 根据单词统计数据对象创建聊天机器人消息。
+     *
+     * @param dto 单词统计数据传输对象，包含群聊中单词的排名和频率信息。
+     * @return 包含生成的报告消息的列表。
+     * <p>
+     * 该方法首先获取机器人自身的信息，然后根据传入的DTO构建一份关于群聊中单词使用情况的报告，
+     * 并将该报告作为消息添加到消息列表中。报告内容包括群聊中使用频率最高的前十個单词及其出现次数。
+     */
+    private static List<Message> createWordStatBotMsg(WordStatisticsDTO dto) {
+        // 获取机器人信息，可能包含机器人名称、头像等，用于构建消息列表
+        List<Message> messages = getBotInfo();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("以下是群聊里群友们在这一周中说的最多的前十个词语，请你生成一份可爱的报告：\n");
+        for (int i = 0; i < 10; i++) {
+            sb.append(String.format("%d. 词语：%s 次数：%d \n", i + 1, dto.getTop10Words().get(i), dto.getTop10Cnt().get(i)));
+        }
+        sb.append("报告要可爱，简短，用一段话给出一个表述即可");
+
+        // 根据报告内容构建消息对象
+        Message message = Message.builder()
+                .role(AIRoleType.USER.getRole())
+                .content(sb.toString())
+                .build();
+        // 将消息对象添加到消息列表中
+        messages.add(message);
+
+        // 返回包含报告消息的消息列表
+        return messages;
+    }
+
 
     /**
-     * 创建机器人消息列表。
+     * 创建评价某人机器人消息列表。
      * <p>
      * 此方法会首先尝试从指定路径读取机器人的信息，如果读取成功，将基于传入的DTO生成一条用户消息，并将其添加到机器人信息列表中。
      * 如果在读取机器人信息过程中发生IO异常，将抛出数据加载异常。
@@ -625,15 +752,8 @@ public class EntertainmentServiceImpl implements EntertainmentService {
      * @return 返回包含机器人信息和用户评价消息的列表。
      * @throws DataLoadException 如果读取机器人信息时发生IO异常。
      */
-    private static List<Message> createBotMsg(EvaluateSomebodyDTO dto) {
-        List<Message> messages;
-        try {
-            // 尝试从指定路径读取机器人信息
-            messages = FileManager.readBotInfo(DataPathInfo.BOT_INFO_PATH);
-        } catch (IOException e) {
-            // 如果读取过程中发生IO异常，抛出运行时异常
-            throw new DataLoadException(MsgConstant.BOT_INFO_LOAD_ERROR);
-        }
+    private static List<Message> createEvaluateBotMsg(EvaluateSomebodyDTO dto) {
+        List<Message> messages = getBotInfo();
 
         Message message = Message.builder()
                 .role(AIRoleType.USER.getRole())
@@ -646,6 +766,27 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         messages.add(message);
         return messages;
     }
+
+    /**
+     * 获取机器人信息。
+     * <p>
+     * 本方法尝试从指定的文件路径中读取机器人配置信息，并返回这些信息。
+     * 如果在读取过程中发生IO异常，方法将抛出一个自定义的数据加载异常。
+     *
+     * @return List<Message> 包含机器人信息的列表。每个消息对象代表一个特定类型的机器人信息。
+     * @throws DataLoadException 如果读取机器人信息文件失败，将抛出此异常。
+     */
+    private static List<Message> getBotInfo() {
+        List<Message> messages;
+        try {
+            // 尝试从指定路径读取机器人信息
+            return messages = FileManager.readBotInfo(DataPathInfo.BOT_INFO_PATH);
+        } catch (IOException e) {
+            // 如果读取过程中发生IO异常，抛出运行时异常
+            throw new DataLoadException(MsgConstant.BOT_INFO_LOAD_ERROR);
+        }
+    }
+
 
     /**
      * 获取指定用户的聊天历史消息。

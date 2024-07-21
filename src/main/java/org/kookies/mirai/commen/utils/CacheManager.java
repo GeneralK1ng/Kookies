@@ -180,6 +180,23 @@ public class CacheManager {
         return tempFile;
     }
 
+    /**
+     * 根据群组ID获取该群组一周内各天的消息数量统计。
+     * 该方法主要用于统计指定群组在一周内每天的消息数量，以便进行数据分析或展示。
+     *
+     * @param groupId 群组的唯一标识符，用于定位特定群组的消息数据。
+     * @return 返回一个Map，其中键为一周内的日期（字符串格式），值为该日期对应的消息数量。
+     */
+    public static Map<String, Integer> getWeekCount(Long groupId) {
+        // 根据群组ID和启用的群组列表生成群组目录名，用于定位群组的消息缓存目录。
+        String groupDirName = getGroupDirName(getConfig().getEnableGroupList(), groupId);
+        // 创建群组目录的File对象，用于后续访问或操作该群组的消息文件。
+        File groupDir = new File(DataPathInfo.MESSAGE_CACHE_DIR_PATH, groupDirName);
+
+        // 调用generateWeekCount方法，对群组目录下的消息文件进行统计，返回一周内每天的消息数量。
+        return generateWeekCount(groupDir);
+    }
+
 
     /**
      * 根据指定的目录生成过去七天的单词计数统计。

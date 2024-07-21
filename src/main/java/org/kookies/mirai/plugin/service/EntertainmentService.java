@@ -62,4 +62,12 @@ public interface EntertainmentService {
      * @param group 群
      */
     void weekWord(long id, Group group);
+
+    /**
+     * 词频统计
+     *
+     * @param id 发送者
+     * @param group 群
+     */
+    void wordStatistics(long id, Group group);
 }

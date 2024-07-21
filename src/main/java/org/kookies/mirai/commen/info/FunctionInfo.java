@@ -25,6 +25,8 @@ public class FunctionInfo {
 
     public static final String YESTERDAY_WORD = "昨日词云";
 
+    public static final String WORD_STATISTICS = "词频统计";
+
     public static final String DARK_JOKE = "地狱笑话";
 
     public static final String BEAUTIFUL_GIRL = "先打胶吧";
