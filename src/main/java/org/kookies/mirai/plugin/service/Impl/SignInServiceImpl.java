@@ -98,10 +98,34 @@ public class SignInServiceImpl implements SignInService {
                 // 构建消息链，包含AT发送者和图片信息，最后发送消息
                 sendMsg(at, group, chain, image);
             }else {
-                sendMsg(at, group, chain, MsgConstant.TODAY_GIRL_FRIEND_PERMISSION_DUPLICATE_ERROR);
+                byte[] budGuy = getBadGuy();
+                Image image = group.uploadImage(ExternalResource.create(Objects.requireNonNull(budGuy)));
+                sendMsg(at, group, chain, image);
             }
         }
     }
+
+    /**
+     * 获取有问题的家伙的图像数据。
+     * <p>
+     * 本方法尝试通过调用ApiRequester的getBadGuyImg方法来获取特定图像数据，
+     * 这些图像数据用于表示或标识“有问题的家伙”。
+     * 如果在获取图像数据的过程中发生IO异常，方法将捕获该异常，
+     * 并抛出一个自定义的RequestException异常，以通知调用者图像获取失败。
+     *
+     * @return byte[] 返回有问题家伙的图像数据，以字节数组形式表示。
+     * @throws RequestException 如果获取图像数据过程中发生IO异常，则抛出此异常。
+     */
+    private byte[] getBadGuy() {
+        try {
+            // 尝试获取有问题的家伙的图像数据。
+            return ApiRequester.getBadGuyImg();
+        } catch (IOException e) {
+            // 当发生IO异常时，抛出自定义异常。
+            throw new RequestException(MsgConstant.IMAGE_GET_ERROR);
+        }
+    }
+
 
     /**
      * 发送消息到群组中。

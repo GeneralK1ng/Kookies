@@ -2,6 +2,7 @@ package org.kookies.mirai.commen.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -10,6 +11,7 @@ import okhttp3.Response;
 import org.json.JSONObject;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.*;
+import org.kookies.mirai.commen.enumeration.BadGuyType;
 import org.kookies.mirai.commen.enumeration.RequestType;
 import org.kookies.mirai.commen.info.DataPathInfo;
 import org.kookies.mirai.pojo.entity.Config;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
@@ -99,6 +102,43 @@ public class ApiRequester {
         Response response = HTTP_CLIENT.newCall(request).execute();
         // 从响应中提取并返回视频数据。
         return response.body().bytes();
+    }
+
+    /**
+     * 获取一个随机的坏人图片。
+     * <p>
+     * 该方法通过向百度图搜API发送请求，根据指定的坏人名称搜索图片，并随机选择一张返回。
+     *
+     * @return 包含随机坏人图片的字节数组。
+     * @throws IOException 如果网络请求失败或解析响应出错。
+     */
+    public static byte[] getBadGuyImg() throws IOException {
+        // 根据坏人类型获取坏人的名称
+        String badGuyName = BadGuyType.getRandomBadGuyType().getBadGuyName();
+        // 构建请求URL，包括坏人的名称和页码
+        Request request = new Request.Builder()
+                .url(LiuLiApiConstant.BAI_DU_IMG_SEARCH_URL +
+                        "?msg=" + badGuyName +
+                        "&pn=" + 1)
+                // 设置请求方法为GET
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+        // 执行网络请求并获取响应
+        Response response = HTTP_CLIENT.newCall(request).execute();
+        // 使用GSON从响应体中解析出JSON对象
+        JsonObject jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+        // 从JSON对象中获取数据数组
+        JsonArray jsonArray = jsonObject.getAsJsonArray("data");
+        // 随机选择一个图片URL
+        Random random = new Random();
+        String url = jsonArray.get(random.nextInt(jsonArray.size()))
+                .getAsJsonObject()
+                .get("thumbnailUrl")
+                .toString()
+                .replace("\"", "")
+                .trim();
+        // 根据URL获取图片字节数组并返回
+        return getPhoto(url);
     }
 
 
