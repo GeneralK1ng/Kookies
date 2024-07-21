@@ -149,6 +149,7 @@ public class TextAnalyzer {
                 .filter(entry -> !"r".equals(entry.getValue()))
                 .filter(entry -> !"p".equals(entry.getValue()))
                 .filter(entry -> !"c".equals(entry.getValue()))
+                .filter(entry -> !"u".equals(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
