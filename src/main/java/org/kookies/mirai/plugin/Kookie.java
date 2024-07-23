@@ -185,6 +185,12 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("本周词云, 调用者：" + userName);
                     entertainmentService.weekWord(sender.getId(), group);
                     break;
+
+                // 摸鱼日报
+                case FunctionInfo.MESS_AROUND_DAILY:
+                    getLogger().info("摸鱼日报, 调用者：" + userName);
+                    signInService.messAroundDaily(sender.getId(), group);
+                    break;
             }
         });
 

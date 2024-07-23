@@ -81,4 +81,6 @@ public class MsgConstant {
     public static final String WEEK_WORD_COUNT_ISNT_HAS_SEVEN_DAYS = "本周词频统计没有七天数据";
 
     public static final String TEMP_THUMB_DELETE_ERROR = "临时缩略图删除失败";
+
+    public static final String MESS_AROUND_DAILY_GET_ERROR = "摸鱼日报获取失败";
 }

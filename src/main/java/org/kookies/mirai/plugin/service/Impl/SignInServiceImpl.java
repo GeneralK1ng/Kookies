@@ -13,6 +13,7 @@ import okhttp3.Response;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
 import org.kookies.mirai.commen.constant.LiuLiApiConstant;
 import org.kookies.mirai.commen.constant.MsgConstant;
+import org.kookies.mirai.commen.constant.WeiMengApiConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.RequestException;
@@ -104,6 +105,30 @@ public class SignInServiceImpl implements SignInService {
             }
         }
     }
+
+    /**
+     * 摸鱼日报功能。
+     * <p>
+     * 该方法用于每日获取摸鱼日报图片，并将其上传至指定群组，然后向群组发送该图片。
+     *
+     * @param id 用户ID，用于权限检查。
+     * @param group 目标群组，用于在其中上传和发送图片。
+     * @throws RequestException 如果请求摸鱼日报图片时发生IO异常。
+     * @assert 权限检查，确保用户有权进行此操作。
+     */
+    @Override
+    public void messAroundDaily(long id, Group group) {
+        assert Permission.checkPermission(id, group.getId());
+        byte[] getMessAroundDaily;
+        try {
+            getMessAroundDaily = ApiRequester.getPhoto(WeiMengApiConstant.MESS_AROUND_DAILY);
+        } catch (IOException e) {
+            throw new RequestException(MsgConstant.MESS_AROUND_DAILY_GET_ERROR);
+        }
+        Image image = group.uploadImage(ExternalResource.create(getMessAroundDaily));
+        group.sendMessage(image);
+    }
+
 
     /**
      * 获取有问题的家伙的图像数据。

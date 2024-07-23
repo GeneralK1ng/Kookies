@@ -137,21 +137,25 @@ public class TextAnalyzer {
 
 
     /**
-     * 过滤掉Map中值为"m"的条目。
-     * 该方法通过流操作对输入的Map进行过滤，移除所有值为"m"的键值对，返回一个新的Map。
+     * 过滤字典中特定值的条目。
+     * <p>
+     * 该方法通过流操作过滤出不包含特定字符（'m', 'r', 'p', 'c', 'u'）值的键值对。
      *
-     * @param words 输入的Map，其中键为字符串，值也为字符串。
-     * @return 返回一个新的Map，其中不包含值为"m"的条目。
+     * @param words 原始字典，包含待过滤的键值对。
+     * @return 过滤后的字典，不包含特定字符值的条目。
      */
     private static Map<String, String> filter(Map<String, String> words) {
         return words.entrySet().stream()
+                // 通过多次过滤操作移除值为特定字符的条目
                 .filter(entry -> !"m".equals(entry.getValue()))
                 .filter(entry -> !"r".equals(entry.getValue()))
                 .filter(entry -> !"p".equals(entry.getValue()))
                 .filter(entry -> !"c".equals(entry.getValue()))
                 .filter(entry -> !"u".equals(entry.getValue()))
+                // 收集过滤后的条目组成新的字典
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
+
 
 
 

@@ -21,4 +21,12 @@ public interface SignInService {
      * @param group  群
      */
     void todayGirlFriend(long sender, Group group);
+
+    /**
+     * 获取摸鱼日报
+     *
+     * @param id     发送者
+     * @param group  群
+     */
+    void messAroundDaily(long id, Group group);
 }
