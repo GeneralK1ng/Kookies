@@ -7,7 +7,7 @@ import okhttp3.MediaType;
  */
 public class BaiduApiConstant {
 
-    public static final String API_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/yi_34b_chat";
+    public static final String AI_API_URL = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/yi_34b_chat";
 
     public static final String TOKEN_URL = "https://aip.baidubce.com/oauth/2.0/token";
 

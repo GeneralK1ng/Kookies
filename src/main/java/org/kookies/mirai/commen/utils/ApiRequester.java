@@ -283,7 +283,7 @@ public class ApiRequester {
         RequestBody body = createBaiduRequestBody(messages, sender);
         // 构建请求，包括设置URL、请求方法、请求头和请求体
         Request request = new Request.Builder()
-                .url(BaiduApiConstant.API_URL +
+                .url(BaiduApiConstant.AI_API_URL +
                         "?access_token=" + getBaiduAccessToken())
                 .method(RequestType.POST.getMethod(), body)
                 .addHeader("Content-Type", String.valueOf(BaiduApiConstant.JSON_MEDIA_TYPE))
