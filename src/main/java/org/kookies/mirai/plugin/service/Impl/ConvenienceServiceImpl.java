@@ -1,9 +1,6 @@
 package org.kookies.mirai.plugin.service.Impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.code.MiraiCode;
@@ -27,6 +24,7 @@ import org.kookies.mirai.pojo.dto.PoiDTO;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
 import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
+import org.kookies.mirai.pojo.entity.api.response.baidu.olympic.OlympicDataResponse;
 import org.kookies.mirai.pojo.entity.api.response.gaode.AddressResponse;
 import org.kookies.mirai.pojo.entity.api.response.gaode.POI;
 import org.kookies.mirai.pojo.entity.api.response.gaode.POIResponse;
@@ -117,6 +115,123 @@ public class ConvenienceServiceImpl implements ConvenienceService {
         }
 
     }
+
+    /**
+     * 发送奥运日报
+     * 本函数用于向指定群组发送奥运日报信息，包括奖牌榜和比赛结果等
+     * 使用了权限校验来确保只有具有相应权限的用户才能触发此功能
+     *
+     * @param sender 发送者的QQ号，用于识别发送者并进行权限校验
+     * @param group  发送消息的群组对象，用于确定消息发送的目标群组
+     */
+    @Override
+    public void olympicDaily(long sender, Group group) {
+        // 校验发送者是否有权限在目标群组中发送消息
+        assert Permission.checkPermission(sender, group.getId());
+
+        // 创建一个@消息，用于在消息中提及发送者
+        MessageChain at = MiraiCode.deserializeMiraiCode("[mirai:at:" + sender + "]");
+
+        // 从API或数据源中获取最新的奥运数据
+        List<OlympicDataResponse> data = getOlympicData();
+
+        // 根据获取的奥运数据，创建机器人要发送的消息内容
+        List<Message> botMsg = createBotMsg(data);
+
+        // 根据机器人发送的消息内容，获取发送者可能的回应
+        ChatResponse chatResponse = getResponse(botMsg, sender);
+
+        // 向目标群组发送消息，包括回应结果和奥运数据
+        sendMsg(group, chatResponse.getResult(), data);
+    }
+
+
+    /**
+     * 获取奥运数据排名前10的记录
+     * <p>
+     * 本函数通过API请求获取奥运数据，解析JSON格式的响应，并提取出排名前10的奖牌信息
+     *
+     * @return 包含排名前10的奥运数据响应对象的列表
+     * @throws RuntimeException 如果API请求失败或JSON解析出错，将抛出运行时异常
+     */
+    public static List<OlympicDataResponse> getOlympicData() {
+        List<OlympicDataResponse> data;
+        try {
+            // 从API获取奥运数据
+            Response olympicResponse = ApiRequester.getOlympicData();
+            // 将响应体解析为JsonObject，以便提取所需数据
+            JsonObject jsonObject = GSON.fromJson(olympicResponse.body().string(), JsonObject.class);
+
+            // 逐步访问JSON对象，提取出奖牌列表的前10项
+            JsonArray jsonArray = jsonObject.getAsJsonObject("tplData")
+                    .getAsJsonObject("data")
+                    .getAsJsonArray("tabsList")
+                    .get(0)
+                    .getAsJsonObject()
+                    .getAsJsonObject("data")
+                    .getAsJsonArray("medalList")
+                    .get(0)
+                    .getAsJsonArray();
+
+            // 初始化计数器和新的JsonArray，用于存储前10项数据
+            int cnt = 0;
+            JsonArray newJsonArray = new JsonArray();
+            for (JsonElement jsonElement : jsonArray) {
+                if (cnt++ < 10) {
+                    newJsonArray.add(jsonElement);
+                }
+            }
+
+            // 定义类型令牌，用于GSON反序列化过程中的类型转换
+            Type listType = new TypeToken<List<OlympicDataResponse>>() {}.getType();
+            // 将筛选后的JSON数据反序列化为OlympicDataResponse对象列表
+            data = GSON.fromJson(newJsonArray, listType);
+        } catch (IOException e) {
+            // 如果发生IO异常，包装为运行时异常并抛出
+            throw new RuntimeException(e);
+        }
+        // 返回处理后的数据列表
+        return data;
+    }
+
+    /**
+     * 发送消息到群组，展示奖牌榜和相关聊天回复
+     *
+     * @param group 要发送消息的群组对象
+     * @param chatRes 聊天机器人的回复文本
+     * @param data 奥运会数据响应列表，包含各个国家的奖牌信息
+     */
+    private void sendMsg(Group group, String chatRes, List<OlympicDataResponse> data) {
+        // 创建消息链构建器，用于构建要发送的消息链
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+        // 创建字符串构建器，用于构建奖牌榜文本
+        StringBuilder sb = new StringBuilder();
+        // 添加奖牌榜标题
+        sb.append("\t目前奖牌榜 \n");
+        // 添加奖牌榜列名
+        sb.append("排名\t国家\t金\t银\t铜\t总\n");
+        // 遍历奥运会数据响应列表，构建每个国家的奖牌信息
+        for (OlympicDataResponse country : data) {
+            // 格式化国家的奖牌信息
+            String msg = String.format("%d.\t%s\t%d\t%d\t%d\t%d\n",
+                    country.getRank(),
+                    country.getCountryName(),
+                    country.getGold(),
+                    country.getSilver(),
+                    country.getBronze(),
+                    country.getTotal());
+            // 将国家的奖牌信息追加到字符串构建器中
+            sb.append(msg);
+        }
+        // 发送构建好的奖牌榜文本消息到群组
+        group.sendMessage(new PlainText(sb.toString()));
+        // 发送聊天机器人的回复文本到群组
+        group.sendMessage(new PlainText(chatRes));
+
+    }
+
+
     /**
      * 发送消息给指定群组，包括代码执行结果和评价信息。
      *
@@ -182,6 +297,50 @@ public class ConvenienceServiceImpl implements ConvenienceService {
         messages.add(message);
         return messages;
     }
+
+    /**
+     * 根据奥运会数据创建机器人消息
+     * <p>
+     * 本函数首先尝试从文件中读取机器人信息，然后根据提供的奥运会数据生成一条新的消息，
+     * 最后将这条消息添加到消息列表中返回
+     *
+     * @param data 奥运会数据响应列表，包含各个国家的奖牌信息
+     * @return 消息列表，其中包括了根据奥运会数据生成的新消息
+     * @throws DataLoadException 如果无法从文件中加载机器人信息，则抛出此异常
+     */
+    private static List<Message> createBotMsg(List<OlympicDataResponse> data) {
+        List<Message> messages;
+        try {
+            // 从文件中读取机器人信息
+            messages = FileManager.readBotInfo(DataPathInfo.BOT_INFO_PATH);
+        } catch (IOException e) {
+            // 如果读取失败，抛出自定义异常
+            throw new DataLoadException(MsgConstant.BOT_INFO_LOAD_ERROR);
+        }
+        StringBuilder sb = new StringBuilder();
+
+        // 遍历奥运会数据，构建奖牌榜信息
+        for (OlympicDataResponse country : data) {
+            String info = String.format("第%d名\t国家：%s\t金牌数：%d\t银牌数：%d\t铜牌数：%d\t总数：%d\n",
+                    country.getRank(),
+                    country.getCountryName(),
+                    country.getGold(),
+                    country.getSilver(),
+                    country.getBronze(),
+                    country.getTotal());
+            sb.append(info);
+        }
+
+        // 使用构建的奖牌榜信息创建一条新消息，并添加到消息列表中
+        Message message = Message.builder()
+                .role(AIRoleType.USER.getRole())
+                .content("这是目前正在进行的奥运会的奖牌榜，请你写一个简单的播报，用一段话说出。\n" +
+                        sb.toString())
+                .build();
+        messages.add(message);
+        return messages;
+    }
+
 
 
     /**

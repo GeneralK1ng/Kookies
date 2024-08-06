@@ -35,4 +35,6 @@ public class DataPathInfo {
     public static final String FONTS_PATH = "/fonts";
 
     public static final String SYSTEM_FONT_PATH = "/usr/share/fonts/kookie";
+
+    public static final String STOP_WORD_PATH = "/data/stopwords.txt";
 }

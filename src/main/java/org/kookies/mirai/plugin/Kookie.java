@@ -191,6 +191,11 @@ public final class Kookie extends JavaPlugin {
                     getLogger().info("摸鱼日报, 调用者：" + userName);
                     signInService.messAroundDaily(sender.getId(), group);
                     break;
+                // 奥运日报
+                case FunctionInfo.OLYMPIC_DAILY:
+                    getLogger().info("奥运日报, 调用者：" + userName);
+                    convenienceService.olympicDaily(sender.getId(), group);
+                    break;
             }
         });
 

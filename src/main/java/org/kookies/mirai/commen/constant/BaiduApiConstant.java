@@ -17,5 +17,7 @@ public class BaiduApiConstant {
 
     public static final String GRANT_TYPE = "client_credentials";
 
+    public static final String OLYMPIC_URL = "https://tiyu.baidu.com/al/major/home";
+
 
 }

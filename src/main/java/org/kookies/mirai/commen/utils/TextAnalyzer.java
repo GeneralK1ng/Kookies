@@ -4,9 +4,13 @@ import org.ansj.domain.Result;
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.ToAnalysis;
 import org.apache.commons.lang3.ArrayUtils;
+import org.kookies.mirai.commen.info.DataPathInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +61,33 @@ public class TextAnalyzer {
                 .collect(Collectors.groupingBy(Map.Entry::getKey,
                 // 对每个分组计算出现的总次数，这里使用summingInt函数来实现
                 Collectors.summingInt(e -> 1)));
+    }
+
+    /**
+     * 根据停用词列表过滤文本中的词频统计结果
+     * <p>
+     * 本函数的目的是从给定的词频统计文件中移除所有属于停用词列表中的词
+     * 停用词是指在文本中出现频率很高，但对文本内容影响较小的词，如“的”、“和”等
+     * 过滤这些词可以帮助我们更关注于文本中重要的词汇
+     *
+     * @param wordCountFile 词频统计结果文件，该文件包含了每个词及其出现的次数
+     * @throws IOException 如果在读取或写入文件过程中发生错误
+     */
+    public static void filtrateStopWords(File wordCountFile) throws IOException {
+        // 读取词频统计结果到map中，每个entry包含词及其出现的次数
+        Map<String, Integer> map = FileManager.readWordMap(wordCountFile.getPath());
+
+        // 读取停用词列表
+        Set<String> stopWords = FileManager.readStopWords(DataPathInfo.STOP_WORD_PATH);
+
+        // 移除map中所有停用词
+        map.entrySet().removeIf(entry ->
+                stopWords.contains(entry.getKey())
+                || entry.getKey().isEmpty()
+        );
+
+        // 将过滤后的词频统计结果写入到新的文本文件中
+        FileManager.writeWordMap2Txt(wordCountFile.getPath(), map);
     }
 
     /**

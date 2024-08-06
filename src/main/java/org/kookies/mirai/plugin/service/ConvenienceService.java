@@ -27,4 +27,12 @@ public interface ConvenienceService {
      * @param lang 提供的编程语言
      */
     void codeRun(long sender, Group group, String code, String lang);
+
+    /**
+     * 获取当前奥运信息
+     *
+     * @param sender 发送请求的用户ID
+     * @param group 目标群组
+     */
+    void olympicDaily(long sender, Group group);
 }

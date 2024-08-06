@@ -701,6 +701,7 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         // 创建FrequencyFileLoader实例，用于加载单词频率文件。
         FrequencyFileLoader frequencyFileLoader = new FrequencyFileLoader();
         try {
+            TextAnalyzer.filtrateStopWords(wordCountFile);
             // 调用load方法加载单词频率文件，并返回加载的结果。
             return frequencyFileLoader.load(wordCountFile);
         } catch (IOException e) {

@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author General_K1ng
@@ -308,5 +309,42 @@ public class FileManager {
     }
 
 
-
+    /**
+     * 从指定路径读取停用词文件，并将停用词加载到内存中
+     *
+     * @param stopWordPath 停用词文件的路径
+     * @return 返回一个包含所有停用词的Set集合
+     * @throws IOException 如果无法读取文件或读取过程中发生错误，则抛出此异常
+     * <p>
+     * 为什么需要这样做：
+     * 停用词是在文本处理中用于过滤掉一些不重要的常见词，如“的”、“和”等，
+     * 这些词在文本中出现频率很高，但对文本的主题内容影响不大在对文本进行分词或分析前，
+     * 读取并加载停用词表到内存，可以方便后续的文本处理操作快速判断并过滤掉这些词
+     * <p>
+     * 为什么使用BufferedReader：
+     * 使用BufferedReader可以有效地提高读取文件的效率，因为它内部有一个字符缓冲区，
+     * 可以减少对磁盘的访问次数，提高整体的读取速度
+     * <p>
+     * 为什么使用try-with-resources：
+     * try-with-resources语句可以自动管理资源，特别是自动关闭实现了AutoCloseable接口的资源，
+     * 这里主要是自动关闭BufferedReader对象，这样可以保证即使在读取过程中发生异常，
+     * 文件也能被正确关闭，避免资源泄露
+     * <p>
+     * 为什么使用流的方式读取文件：
+     * 对于文本文件，逐行读取可以有效节省内存，并且可以边读取边处理，不需要将整个文件一次性加载到内存中，
+     * 这对于大文件的处理尤为重要
+     * <p>
+     * 为什么要去重：
+     * 停用词表中可能存在重复的词，为了节省内存空间并提高处理效率，需要将重复的词去除，
+     * 使用Set集合可以自动去重
+     */
+    public static Set<String> readStopWords(String stopWordPath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                Objects.requireNonNull(FileManager.class.getResourceAsStream(stopWordPath))))) {
+            return reader.lines()
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .collect(Collectors.toSet());
+        }
+    }
 }
