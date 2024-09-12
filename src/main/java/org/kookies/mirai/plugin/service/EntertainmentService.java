@@ -70,4 +70,19 @@ public interface EntertainmentService {
      * @param group 群
      */
     void wordStatistics(long id, Group group);
+
+    /**
+     * 攻击某人
+     * @param sender 发送者
+     * @param group 群
+     */
+    void fuckSomebody(Member sender, Group group);
+
+    /**
+     *  柴郡表情
+     *
+     * @param id 发送者
+     * @param group 群
+     */
+    void randomEmoji(long id, Group group);
 }

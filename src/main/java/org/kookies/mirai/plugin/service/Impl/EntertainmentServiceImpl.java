@@ -22,9 +22,11 @@ import net.mamoe.mirai.utils.ExternalResource;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.kookies.mirai.commen.adapter.LocalDateAdapter;
+import org.kookies.mirai.commen.constant.LolimiApiConstant;
 import org.kookies.mirai.commen.constant.MsgConstant;
 import org.kookies.mirai.commen.constant.WordCloudConstant;
 import org.kookies.mirai.commen.enumeration.AIRoleType;
+import org.kookies.mirai.commen.enumeration.EmojiType;
 import org.kookies.mirai.commen.enumeration.JokeType;
 import org.kookies.mirai.commen.exceptions.DataLoadException;
 import org.kookies.mirai.commen.exceptions.DataWriteException;
@@ -243,6 +245,12 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         // 从缓存中获取群组一周内的单词使用次数统计
         Map<String, Integer> weekCnt = CacheManager.getWeekCount(group.getId());
 
+        try {
+            weekCnt = TextAnalyzer.filtrateStopWords(weekCnt);
+        } catch (IOException e) {
+            throw new DataLoadException(MsgConstant.WORD_MAP_LOAD_ERROR);
+        }
+
         // 根据单词使用次数统计生成DTO对象，用于数据传输和消息创建
         WordStatisticsDTO dto = generateWordStatistics(weekCnt);
 
@@ -255,6 +263,63 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         // 发送统计结果到指定群组
         sendMsg(dto, group, chain, response.getResult());
     }
+
+    /**
+     * 允许成员在群组内执行 "fuckSomebody" 操作。
+     * <p>
+     * 此方法覆盖了父类中的方法，实现了其功能。
+     *
+     * @param sender 执行操作的成员。该成员必须在群组内具有适当的权限。
+     * @param group 执行操作所在的群组。群组提供了操作发生的上下文环境。
+     * <p>
+     * 前置条件：已检查发送者的权限，确保他们有权执行此操作。
+     * 后置条件：向群组发送预定义的消息，通知 "fuckSomebody" 操作已被执行。
+     * <p>
+     * 断言：检查发送者是否在群组中具有必要的权限，否则将抛出 AssertionError。
+     * 使用场景：具有适当权限的成员可以使用此方法来通知群组特定的操作。
+     */
+    @Override
+    public void fuckSomebody(Member sender, Group group) {
+        // 检查发送者是否在群组中具有必要的权限，否则将抛出 AssertionError。
+        assert Permission.checkPermission(sender.getId(), group.getId());
+
+        // 获取预定义的 "fuckSomebody" 消息。
+        String msg = getFuckSomebody();
+
+        // 向群组发送消息，通知操作已被执行。
+        group.sendMessage(msg);
+    }
+
+    @Override
+    public void randomEmoji(long id, Group group) {
+        assert Permission.checkPermission(id, group.getId());
+        byte[] data = null;
+        try {
+            switch (EmojiType.randomEmoji()) {
+                case "anime":
+                    data = ApiRequester.getPhoto(LolimiApiConstant.RANDOM_EMOJI_API + "?type=动漫表情");
+                    break;
+                case "cheshire":
+                    data = ApiRequester.getPhoto(LolimiApiConstant.CHESHIRE_API);
+                    break;
+                case "chiikawa":
+                    data = ApiRequester.getPhoto(LolimiApiConstant.RANDOM_EMOJI_API + "?type=小八嘎");
+                    break;
+                case "long":
+                    data = ApiRequester.getPhoto(LolimiApiConstant.LONG_API);
+                    break;
+            }
+
+        } catch (IOException e) {
+            throw new RequestException(MsgConstant.RANDOM_EMOJI_REQUEST_ERROR);
+        }
+
+        if (data != null) {
+            Image image = group.uploadImage(ExternalResource.create(data));
+            group.sendMessage(image);
+        }
+    }
+
 
     /**
      * 向指定群组发送一个美丽的女孩的短视频。
@@ -405,6 +470,22 @@ public class EntertainmentServiceImpl implements EntertainmentService {
         } catch (IOException e) {
             // 如果在保存过程中发生IO异常，抛出一个自定义的请求异常
             throw new RequestException(MsgConstant.BEAUTIFUL_GIRL_VIDEO_SAVE_ERROR);
+        }
+    }
+
+    /**
+     * 通过 API 请求获取 "fuck somebody" 消息。
+     * <p>
+     * 此方法封装了请求特定消息的逻辑，从外部服务获取信息，并将成功的结果转换为字符串格式。如果请求失败，
+     * 则会抛出一个自定义异常来通知调用者发生了错误。
+     */
+    private static String getFuckSomebody() {
+        try {
+            // 向 API 发起请求以获取 "fuck somebody" 消息
+            return ApiRequester.getFuckSomebody();
+        } catch (IOException e) {
+            // 如果在请求过程中发生 IOException，抛出自定义 RequestException
+            throw new RequestException(MsgConstant.FUCK_SOMEBODY_REQUEST_ERROR);
         }
     }
 

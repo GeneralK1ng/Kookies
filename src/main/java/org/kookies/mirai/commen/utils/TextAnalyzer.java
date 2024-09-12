@@ -91,6 +91,29 @@ public class TextAnalyzer {
     }
 
     /**
+     * 过滤掉停用词
+     * <p>
+     * 该方法接收一个Map对象，其中包含字符串键和它们的整数值，
+     * 并返回一个新的Map对象，其中不包含停用词和空字符串键
+     *
+     * @param map 原始的字符串键和整数值的Map对象
+     * @return 包含非停用词和非空字符串键的Map对象
+     * @throws IOException 如果无法读取停用词文件，则抛出此异常
+     */
+    public static Map<String, Integer> filtrateStopWords(Map<String, Integer> map) throws IOException{
+        // 读取停用词列表
+        Set<String> stopWords = FileManager.readStopWords(DataPathInfo.STOP_WORD_PATH);
+        // 过滤掉停用词和空字符串，并收集为新的Map对象
+        return map.entrySet().stream()
+                .filter(entry ->
+                        !stopWords.contains(entry.getKey())
+                                && !entry.getKey().isEmpty()
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    /**
      * 统计句子中满足特定长度条件的单词出现次数。
      * <p>
      * 该方法首先对句子进行分词，然后筛选出长度大于指定值的单词，最后统计这些单词的出现频率。

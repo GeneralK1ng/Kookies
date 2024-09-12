@@ -83,4 +83,8 @@ public class MsgConstant {
     public static final String TEMP_THUMB_DELETE_ERROR = "临时缩略图删除失败";
 
     public static final String MESS_AROUND_DAILY_GET_ERROR = "摸鱼日报获取失败";
+
+    public static final String FUCK_SOMEBODY_REQUEST_ERROR = "攻击某人获取失败";
+
+    public static final String RANDOM_EMOJI_REQUEST_ERROR = " 随机表情图获取失败";
 }

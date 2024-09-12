@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author General_K1ng
@@ -14,5 +14,5 @@ import java.util.List;
 @Builder
 public class BeautifulGirlPermissionDTO implements Serializable {
     private LocalDate date;
-    private List<Long> senders;
+    private Map<Long, Integer> senders;
 }

@@ -102,22 +102,30 @@ public class DuplicatePermission {
         try {
             if (!BEAUTIFUL_GIRL_FILE.exists()) {
                 BEAUTIFUL_GIRL_FILE.getParentFile().mkdirs();
-                return initBeautifulGirlSenderList(sender);
+                return initBeautifulGirlSenderMap(sender);
             } else {
                 JsonObject jsonObject = FileManager.readJsonFile(BEAUTIFUL_GIRL_FILE.getPath());
                 BeautifulGirlPermissionDTO dto = GSON.fromJson(jsonObject, BeautifulGirlPermissionDTO.class);
 
                 if (dto.getDate().equals(LocalDate.now())) {
-                    if (dto.getSenders().contains(sender)) {
-                        return false;
-                    } else {
-                        dto.getSenders().add(sender);
+                    if (!dto.getSenders().containsKey(sender)) {
+                        dto.getSenders().put(sender, 1);
                         String json = GSON.toJson(dto);
                         FileManager.write(BEAUTIFUL_GIRL_FILE.getPath(), json);
                         return true;
+                    } else {
+                        if (dto.getSenders().get(sender).equals(3)) {
+                            return false;
+                        } else {
+                            dto.getSenders().put(sender, dto.getSenders().get(sender) + 1);
+                            String json = GSON.toJson(dto);
+                            FileManager.write(BEAUTIFUL_GIRL_FILE.getPath(), json);
+                            return true;
+                        }
                     }
+
                 } else {
-                    return initBeautifulGirlSenderList(sender);
+                    return initBeautifulGirlSenderMap(sender);
                 }
             }
         } catch (IOException e) {
@@ -206,15 +214,15 @@ public class DuplicatePermission {
      * @return 总是返回true，表示初始化操作已完成。
      * @throws IOException 如果在写入文件过程中发生IO异常。
      */
-    private static boolean initBeautifulGirlSenderList(long sender) throws IOException{
+    private static boolean initBeautifulGirlSenderMap(long sender) throws IOException{
         // 创建发送者列表，并将指定的发送者ID添加到列表中
-        List<Long> senderList = new ArrayList<>();
-        senderList.add(sender);
+        Map<Long, Integer> senderMap = new HashMap<>();
+        senderMap.put(sender, 1);
 
         // 构建一个包含当前日期和发送者列表的数据传输对象
         BeautifulGirlPermissionDTO dto = BeautifulGirlPermissionDTO.builder()
                 .date(LocalDate.now())
-                .senders(senderList)
+                .senders(senderMap)
                 .build();
 
         // 将数据传输对象转换为JSON字符串

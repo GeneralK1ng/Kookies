@@ -382,4 +382,15 @@ public class ApiRequester {
         return HTTP_CLIENT.newCall(request).execute();
     }
 
+    public static String getFuckSomebody() throws IOException{
+        Random random = new Random();
+
+        Request request = new Request.Builder()
+                .url(LolimiApiConstant.FUCK_SOMEBODY_API +
+                        "?msg=" + (random.nextInt(5) + 1))
+                .method(RequestType.GET.getMethod(), null)
+                .build();
+
+        return HTTP_CLIENT.newCall(request).execute().body().string();
+    }
 }
