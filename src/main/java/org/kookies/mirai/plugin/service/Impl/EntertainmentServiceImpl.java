@@ -306,8 +306,9 @@ public class EntertainmentServiceImpl implements EntertainmentService {
                     data = ApiRequester.getPhoto(LolimiApiConstant.RANDOM_EMOJI_API + "?type=小八嘎");
                     break;
                 case "long":
-                    data = ApiRequester.getPhoto(LolimiApiConstant.LONG_API);
-                    break;
+                    if (Permission.checkLongturn(group.getId())) {
+                        data = ApiRequester.getPhoto(LolimiApiConstant.LONG_API);
+                    }
             }
 
         } catch (IOException e) {

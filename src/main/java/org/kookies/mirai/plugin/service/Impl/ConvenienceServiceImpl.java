@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.message.code.MiraiCode;
+import net.mamoe.mirai.message.data.Image;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
@@ -22,6 +23,7 @@ import org.kookies.mirai.plugin.auth.Permission;
 import org.kookies.mirai.plugin.service.ConvenienceService;
 import org.kookies.mirai.pojo.dto.PoiDTO;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
+import org.kookies.mirai.pojo.entity.api.request.baidu.imageRec.SendImageRec;
 import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
 import org.kookies.mirai.pojo.entity.api.response.baidu.ai.ChatResponse;
 import org.kookies.mirai.pojo.entity.api.response.baidu.olympic.OlympicDataResponse;
@@ -35,6 +37,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author General_K1ng
@@ -144,6 +147,70 @@ public class ConvenienceServiceImpl implements ConvenienceService {
         // 向目标群组发送消息，包括回应结果和奥运数据
         sendMsg(group, chatResponse.getResult(), data);
     }
+
+    @Override
+    public void whatIsThat(long sender, Group group, Image image) {
+        // 校验发送者是否有权限
+        assert Permission.checkPermission(sender, group.getId());
+        MessageChain at = MiraiCode.deserializeMiraiCode("[mirai:at:" + sender + "]");
+        MessageChainBuilder chain = new MessageChainBuilder();
+
+
+        String imgUrl = Image.queryUrl(image);
+        System.out.println(imgUrl);
+        SendImageRec sendImageRec = SendImageRec.builder()
+                .url(imgUrl)
+                .question("这张图片中有什么？")
+                .build();
+
+        String taskId = sendImageRecAndGetTaskId(sendImageRec);
+        group.sendMessage("正在识别图片，请稍等...");
+
+        // 等待15秒
+        try {
+            TimeUnit.SECONDS.sleep(15);
+            System.out.println("等待完毕");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("开始获取结果: " + taskId);
+        String description = getImageRecResult(taskId);
+
+        chain.append(at);
+        chain.append(" ");
+        chain.append(image).append("\n").append(description);
+        group.sendMessage(chain.build());
+
+    }
+
+    private static String sendImageRecAndGetTaskId(SendImageRec sendImageRec) {
+        Response response;
+        JsonObject jsonObject;
+
+        try {
+            response = ApiRequester.sendImageRec(sendImageRec);
+            jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+        } catch (IOException e) {
+            throw new RequestException("whatIsThat请求失败");
+        }
+
+        return jsonObject.get("result").getAsJsonObject().get("task_id").toString();
+    }
+
+
+    private static String getImageRecResult(String taskId) {
+        Response response;
+        JsonObject jsonObject;
+
+        try {
+            response = ApiRequester.getImageRecResult(taskId);
+            jsonObject = GSON.fromJson(response.body().string(), JsonObject.class);
+            return jsonObject.get("result").getAsJsonObject().get("description").toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 
     /**

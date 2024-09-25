@@ -1,6 +1,7 @@
 package org.kookies.mirai.plugin.service;
 
 import net.mamoe.mirai.contact.Group;
+import net.mamoe.mirai.message.data.Image;
 
 /**
  * @author General_K1ng
@@ -35,4 +36,13 @@ public interface ConvenienceService {
      * @param group 目标群组
      */
     void olympicDaily(long sender, Group group);
+
+    /**
+     * 识别图像信息
+     *
+     * @param id 发送请求的用户ID
+     * @param group 目标群组
+     * @param image 图像信息
+     */
+    void whatIsThat(long id, Group group, Image image);
 }

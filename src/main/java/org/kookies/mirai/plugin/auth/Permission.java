@@ -72,4 +72,21 @@ public class Permission {
         return false;
     }
 
+    public static boolean checkLongturn(Long group) {
+        JsonObject jsonObject;
+        try {
+            jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        } catch (IOException e) {
+            throw new DataLoadException(MsgConstant.CONFIG_LOAD_ERROR);
+        }
+        Config config = GSON.fromJson(jsonObject, Config.class);
+
+        for (Group g : config.getEnableGroupList()) {
+            if (g.getId().equals(group)){
+                return g.isLongturn();
+            }
+        }
+        return false;
+    }
+
 }

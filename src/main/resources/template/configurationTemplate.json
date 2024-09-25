@@ -6,7 +6,9 @@
     "age": 16,
     "baiduApiConfig": {
       "apiKey": "your apiKey",
-      "secretKey": "your secretKey"
+      "secretKey": "your secretKey",
+      "ImageApiKey": "your ImageApiKey",
+      "ImageSecretKey": "your ImageSecretKey"
     },
     "gaodeApiConfig": {
       "apiKey": "your apiKey"
@@ -34,14 +36,16 @@
       "tag": [
         "test1",
         "test2"
-      ]
+      ],
+      "longturn": false
     },
     {
       "id": 777777,
       "tag": [
         "test3",
         "test4"
-      ]
+      ],
+      "longturn": false
     }
   ]
 }

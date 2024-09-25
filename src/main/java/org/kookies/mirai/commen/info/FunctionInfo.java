@@ -35,4 +35,6 @@ public class FunctionInfo {
 
     public static final String OLYMPIC_DAILY = "奥运日报";
 
+    public static final String WHAT_IS_THAT = "这是什么";
+
 }

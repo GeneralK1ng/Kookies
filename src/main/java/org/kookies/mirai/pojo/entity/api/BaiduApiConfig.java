@@ -6,4 +6,6 @@ import lombok.Data;
 public class BaiduApiConfig {
     private String apiKey;
     private String secretKey;
+    private String ImageApiKey;
+    private String ImageSecretKey;
 }

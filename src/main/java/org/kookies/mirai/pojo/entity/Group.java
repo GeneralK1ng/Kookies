@@ -15,4 +15,6 @@ public class Group implements Serializable {
 
     // 群标签
     private List<String> tag;
+
+    private boolean longturn;
 }

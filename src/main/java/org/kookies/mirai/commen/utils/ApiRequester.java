@@ -18,12 +18,12 @@ import org.kookies.mirai.pojo.entity.Config;
 import org.kookies.mirai.pojo.entity.VoiceRole;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.ChatRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.baidu.ai.Message;
+import org.kookies.mirai.pojo.entity.api.request.baidu.imageRec.SendImageRec;
 import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.runoob.CodeRunRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.voice.VoiceRequest;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.util.List;
@@ -81,6 +81,30 @@ public class ApiRequester {
                 .addHeader("Content-Type", String.valueOf(RunoobApiConstant.FORM_MEDIA_TYPE))
                 .build();
 
+        return HTTP_CLIENT.newCall(request).execute();
+    }
+
+    public static Response getImageRecResult(String taskId) throws IOException {
+        String json = String.format("{\"task_id\":%s}", taskId);
+        System.out.println(json);
+        RequestBody body = RequestBody.create(BaiduApiConstant.JSON_MEDIA_TYPE, json);
+        Request request = new Request.Builder()
+                .url(BaiduApiConstant.IMAGE_RESULT_URL + getBaiduImageToken())
+                .method(RequestType.POST.getMethod(), body)
+                .addHeader("Content-Type", String.valueOf(BaiduApiConstant.JSON_MEDIA_TYPE))
+                .build();
+        return HTTP_CLIENT.newCall(request).execute();
+    }
+
+    public static Response sendImageRec(SendImageRec query) throws IOException {
+        String json = GSON.toJson(query);
+
+        RequestBody body = RequestBody.create(BaiduApiConstant.JSON_MEDIA_TYPE, json);
+        Request request = new Request.Builder()
+                .url(BaiduApiConstant.IMAGE_REQUEST_URL + getBaiduImageToken())
+                .method(RequestType.POST.getMethod(), body)
+                .addHeader("Content-Type", String.valueOf(BaiduApiConstant.JSON_MEDIA_TYPE))
+                .build();
         return HTTP_CLIENT.newCall(request).execute();
     }
 
@@ -349,7 +373,7 @@ public class ApiRequester {
 
         // 创建请求对象，设置请求URL、请求方法、请求体和请求头
         Request request = new Request.Builder()
-                .url(BaiduApiConstant.TOKEN_URL)
+                .url(BaiduApiConstant.AI_TOKEN_URL)
                 .method(RequestType.POST.getMethod(), body)
                 .addHeader("Content-Type", String.valueOf(BaiduApiConstant.FORM_MEDIA_TYPE))
                 .build();
@@ -358,6 +382,21 @@ public class ApiRequester {
         Response response = HTTP_CLIENT.newCall(request).execute();
 
         // 从响应体中解析出访问令牌并返回
+        return new JSONObject(response.body().string()).getString("access_token");
+    }
+
+    private static String getBaiduImageToken() throws IOException {
+        JsonObject jsonObject = FileManager.readJsonFile(DataPathInfo.CONFIG_PATH);
+        Config config = GSON.fromJson(jsonObject, Config.class);
+        RequestBody body = RequestBody.create(BaiduApiConstant.FORM_MEDIA_TYPE,
+                "grant_type=client_credentials&client_id=" + config.getBotInfo().getBaiduApiConfig().getImageApiKey() +
+                        "&client_secret=" + config.getBotInfo().getBaiduApiConfig().getImageSecretKey());
+        Request request = new Request.Builder()
+                .url(BaiduApiConstant.IMAGE_TOKEN_URL)
+                .method(RequestType.POST.getMethod(), body)
+                .addHeader("Content-Type",  String.valueOf(BaiduApiConstant.FORM_MEDIA_TYPE))
+                .build();
+        Response response = HTTP_CLIENT.newCall(request).execute();
         return new JSONObject(response.body().string()).getString("access_token");
     }
 

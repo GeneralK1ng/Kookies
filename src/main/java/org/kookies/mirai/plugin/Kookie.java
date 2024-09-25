@@ -9,8 +9,7 @@ import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
-import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.MessageSource;
+import net.mamoe.mirai.message.data.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kookies.mirai.commen.config.ConfigurationLoader;
@@ -80,6 +79,11 @@ public final class Kookie extends JavaPlugin {
 
             // at me [mirai:at:111111111]
 
+            if (isWhatIsThat(msg)) {
+                getLogger().info("whatIsThat, 调用者：" + userName);
+                convenienceService.whatIsThat(sender.getId(), group, getFirstImage(msg));
+                return;
+            }
 
             String content = "";
             if (!msg.serializeToMiraiCode().startsWith("[mirai:")) {
@@ -89,7 +93,7 @@ public final class Kookie extends JavaPlugin {
             CacheManager.setCache(sender.getId(), group.getId(), content);
 
 
-            if (ProbabilityTrigger.shouldTrigger(0.1)) {
+            if (ProbabilityTrigger.shouldTrigger(0.05)) {
                 getLogger().info("随机表情, 触发者：" + userName);
                 entertainmentService.randomEmoji(sender.getId(), group);
 
@@ -233,6 +237,26 @@ public final class Kookie extends JavaPlugin {
     private boolean isRoleVoiceCall(String msg) {
         // 检查消息长度是否超过3个字符并且是否以语音呼叫指令结尾
         return msg.length() > 3 && msg.endsWith(FunctionInfo.VOICE_SAY);
+    }
+
+    private boolean isWhatIsThat(MessageChain msg) {
+
+        // 如果第一个是文字并且等于 “这是什么” 同时第二个是图片，则返回true
+        for (SingleMessage message : msg) {
+            if (message instanceof PlainText && message.contentToString().equals(FunctionInfo.WHAT_IS_THAT)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Image getFirstImage(MessageChain msg) {
+        for (SingleMessage message : msg) {
+            if (message instanceof Image) {
+                return (Image) message;
+            }
+        }
+        return null;
     }
 
 }
