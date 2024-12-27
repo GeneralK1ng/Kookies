@@ -23,6 +23,8 @@ import org.kookies.mirai.pojo.entity.api.request.gaode.AroundSearchRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.runoob.CodeRunRequestBody;
 import org.kookies.mirai.pojo.entity.api.request.voice.VoiceRequest;
 
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.time.LocalDate;
@@ -274,7 +276,9 @@ public class ApiRequester {
         // 执行请求并获取响应
         Response response = HTTP_CLIENT.newCall(request).execute();
         // 从响应中提取并返回照片的字节数据
-        return response.body().bytes();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ImageIO.write(ImageIO.read(ImageIO.createImageInputStream(response.body().byteStream())), "png" ,byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
     }
 
 
