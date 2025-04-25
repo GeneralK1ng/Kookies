@@ -11,10 +11,10 @@ import net.mamoe.mirai.event.events.GroupMessageEvent;
 import org.kookies.mirai.core.config.AuthorConfig;
 
 
-public final class Kookies extends JavaPlugin {
-    public static final Kookies INSTANCE = new Kookies();
+public final class Kookie extends JavaPlugin {
+    public static final Kookie INSTANCE = new Kookie();
 
-    private Kookies() {
+    private Kookie() {
         super(new JvmPluginDescriptionBuilder(AuthorConfig.ID, AuthorConfig.VERSION)
                 .info(AuthorConfig.INFO)
                 .author(AuthorConfig.AUTHOR)
