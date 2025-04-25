@@ -6,8 +6,8 @@ plugins {
     id("io.freefair.lombok")      apply false
 }
 
-group = "org.kookies"
-version = "0.1.0"
+group = findProperty("group") as String
+version = findProperty("version") as String
 
 allprojects {
     repositories {
@@ -24,17 +24,17 @@ subprojects {
 
     // common dependencies
     dependencies {
-        "implementation"("com.google.code.gson:gson:2.10")
-        "implementation"("org.json:json:20220924")
+        "implementation"("com.google.code.gson:gson:2.13.1")
+        "implementation"("org.json:json:20250107")
         "implementation"("org.apache.httpcomponents:httpclient:4.5.13")
-        "api"          ("com.alibaba:fastjson:1.2.83")
-        "implementation"("org.projectlombok:lombok:1.18.32")
+        "api"          ("com.alibaba.fastjson2:fastjson2:2.0.57")
+        "implementation"("org.projectlombok:lombok:1.18.38")
     }
 
-    // target Java 17
+    // target Java 11
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "11"
         }
     }
 }
