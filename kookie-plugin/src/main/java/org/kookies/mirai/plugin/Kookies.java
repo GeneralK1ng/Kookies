@@ -7,30 +7,23 @@ import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.GlobalEventChannel;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
-import org.kookies.mirai.commen.config.ConfigurationLoader;
-import org.kookies.mirai.commen.constant.MsgConstant;
-import org.kookies.mirai.commen.info.AuthorInfo;
+
+import org.kookies.mirai.core.config.AuthorConfig;
 
 
 public final class Kookies extends JavaPlugin {
     public static final Kookies INSTANCE = new Kookies();
 
     private Kookies() {
-        super(new JvmPluginDescriptionBuilder(AuthorInfo.ID, AuthorInfo.VERSION)
-                .info(AuthorInfo.INFO)
-                .author(AuthorInfo.AUTHOR)
+        super(new JvmPluginDescriptionBuilder(AuthorConfig.ID, AuthorConfig.VERSION)
+                .info(AuthorConfig.INFO)
+                .author(AuthorConfig.AUTHOR)
                 .build());
     }
 
     @Override
     public void onEnable() {
         getLogger().info("Kookie 开始加载！");
-
-        try {
-            ConfigurationLoader.init();
-        } catch (Exception e) {
-            getLogger().error(MsgConstant.CONFIG_LOAD_ERROR, e);
-        }
 
 
         EventChannel<Event> eventChannel = GlobalEventChannel.INSTANCE.parentScope(this);
