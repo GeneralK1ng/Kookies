@@ -16,6 +16,7 @@ import java.util.function.Consumer;
  * <p>
  * Maintains a concurrent registry of event handlers using {@link ConcurrentHashMap} and
  * {@link CopyOnWriteArraySet} to guarantee thread safety during handler registration and event processing.
+ * @author General_K1ng
  */
 public class CoreEventDispatcher {
     private final EventBus eventBus;
